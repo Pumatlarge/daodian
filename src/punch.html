@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>到点 · 确认打卡</title>
+    <link rel="stylesheet" href="punch.css" />
+  </head>
+  <body>
+    <main class="sheet">
+      <div class="eyebrow"><span class="dot"></span>DAODIAN · 打卡</div>
+      <h1 id="punchTitle">确认下班打卡</h1>
+      <p class="sub" id="punchSub">核对一下今天的打卡时间</p>
+      <div class="date-chip" id="punchDate">—</div>
+
+      <div class="times">
+        <label class="time-field">
+          <span>上班打卡时间</span>
+          <input id="punchIn" type="time" step="60" />
+        </label>
+        <span class="arrow">→</span>
+        <label class="time-field">
+          <span>下班打卡时间</span>
+          <input id="punchOut" type="time" step="60" />
+        </label>
+      </div>
+      <p class="hint">如果时间有误，可以直接修改。</p>
+      <p class="error" id="punchError"></p>
+
+      <div class="actions">
+        <button class="btn ghost" id="btnCancel" type="button">取消</button>
+        <button class="btn primary" id="btnConfirm" type="button">确认打卡</button>
+      </div>
+    </main>
+    <script src="../shared/i18n.js"></script>
+    <script src="punch.js"></script>
+  </body>
+</html>

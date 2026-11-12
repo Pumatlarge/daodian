@@ -731,8 +731,12 @@ async function init() {
     btnPunch.addEventListener('click', async (event) => {
       event.stopPropagation();
       const kind = btnPunch.dataset.kind;
-      if (kind !== 'in' && kind !== 'out') return;
-      const next = await bridge.punch(kind);
+      if (kind === 'out') {
+        await bridge.openPunchConfirm();
+        return;
+      }
+      if (kind !== 'in') return;
+      const next = await bridge.punch('in');
       if (next) {
         cfg = next;
         state = computeState(cfg, new Date());
@@ -740,6 +744,14 @@ async function init() {
         recordStats();
         sendSummary();
       }
+    });
+  }
+
+  if (bridge.onPunchCelebrate) {
+    bridge.onPunchCelebrate(() => {
+      celebrate();
+      sendSummary();
+      recordStats();
     });
   }
 

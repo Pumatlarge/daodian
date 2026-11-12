@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 — 2026-11-12
+
+### Added
+
+- Clocking out now opens a confirmation window instead of saving immediately. It shows today's clock-in and clock-out times; both are editable, so a wrong time can be corrected before saving. Cancel leaves the day untouched.
+- After a confirmed clock-out, the card plays a confetti celebration (plus the existing chime when sound is enabled).
+- After the day is clocked out, the tray/widget menu has “修改今日打卡…” to reopen the same editor; correcting an existing punch does not replay the celebration.
+
 ## 0.3.1 — 2026-11-12
 
 ### Fixed

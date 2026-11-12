@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.3.1" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.3.2" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -52,7 +52,7 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 - **Privacy mode.** One click turns every amount into `¥•••` while keeping the progress bar. Useful in an open office, on a screen share, or on a train.
 - **A proper desktop citizen.** Frameless and transparent, always on top, draggable, snap-to-edge, remembers its position, lives in the tray, can start with Windows. `Ctrl + Shift + H` hides or shows it instantly.
 - **Edge auto-tuck.** Optional: after a configurable delay the card slides into the nearest left/right screen edge, leaving a small glowing handle. Hover the handle and it slides back. Delay is adjustable from 1 to 10 seconds.
-- **Clock in / clock out.** On a workday the panel footer carries a punch button: it reads “打卡上班” until you clock in, then “打卡下班” until you clock out. It is available directly on the card all day, not only around the shift edges; the tray and widget menus also offer punch / undo. Settings chooses what a punch means: keep the configured shift (default), use the actual punch times, or a custom mix with a late/early grace.
+- **Clock in / clock out.** On a workday the panel footer carries a punch button: it reads “打卡上班” until you clock in, then “打卡下班” until you clock out. It is available directly on the card all day, not only around the shift edges; the tray and widget menus also offer punch / undo. Clocking out first opens a confirmation with editable clock-in/out times; confirming saves the day and plays a confetti celebration. Settings chooses what a punch means: keep the configured shift (default), use the actual punch times, or a custom mix with a late/early grace.
 - **Work statistics, in its own window.** Open “工作统计…” from the widget or tray menu. The month view is a calendar with earnings heat, overtime marks and mood emojis; the year view is a wall of 12 mini calendars; the day view has a completion ring, punch times, a workday ribbon and the mood picker. Today updates live; history lives in `stats.json` on this machine.
 - **Mood and notes per day.** Pick one of six moods (😄 🙂 😐 😫 😴 🔥) in the day view and write a short note; the emoji appears in the month calendar and everything stays in `stats.json`.
 - **English or Chinese.** The whole interface is translated. Choose English or 中文 in the first-run setup or from the switch in the Settings header; Chinese is the default. Tray menus, dialogs, notifications and the statistics window follow the choice.
@@ -64,8 +64,8 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 
 | Build | File | Notes |
 | --- | --- | --- |
-| Installer | [Daodian-0.3.1-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.1/Daodian-0.3.1-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
-| Portable | [Daodian-0.3.1-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.1/Daodian-0.3.1-Portable.exe) | Single file, no installation |
+| Installer | [Daodian-0.3.2-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.2/Daodian-0.3.2-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
+| Portable | [Daodian-0.3.2-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.2/Daodian-0.3.2-Portable.exe) | Single file, no installation |
 
 [All releases](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -128,7 +128,7 @@ Everything is editable after onboarding:
 | `Ctrl + Shift + H` | Hide / show the widget |
 | Tray icon | Left-click toggles; right-click opens the full menu, including statistics and update status |
 | Edge handle | Appears while tucked; hover to bring the card back |
-| Punch button | Sits in the panel footer on a workday: Clock in, then Clock out; no menu needed |
+| Punch button | Sits in the panel footer on a workday: Clock in, then Clock out; clock-out asks for confirmation with editable times |
 | Work statistics… | Opens its own window: month calendar, year wall, day detail; click a day to add a mood and a note |
 | Language switch | In the first-run setup or the Settings header: 中文 / English |
 
@@ -161,10 +161,10 @@ npm run dist     # installer + portable build
 Outputs:
 
 ```text
-dist/Daodian-0.3.1-Setup.exe
-dist/Daodian-0.3.1-Setup.exe.blockmap
+dist/Daodian-0.3.2-Setup.exe
+dist/Daodian-0.3.2-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.3.1-Portable.exe
+dist/Daodian-0.3.2-Portable.exe
 ```
 
 If Electron or NSIS downloads are slow, set the mirrors first:

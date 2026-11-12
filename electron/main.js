@@ -48,6 +48,7 @@ let win = null;
 let setupWin = null;
 let settingsWin = null;
 let statsWin = null;
+let punchWin = null;
 let tray = null;
 let quitting = false;
 let lastSummary = '';
@@ -150,6 +151,9 @@ function applyLanguage() {
   }
   if (statsWin && !statsWin.isDestroyed()) {
     statsWin.setTitle(i18n.t(lang, '到点 · 工作统计'));
+  }
+  if (punchWin && !punchWin.isDestroyed()) {
+    punchWin.setTitle(i18n.t(lang, '到点 · 确认打卡'));
   }
   if (setupWin && !setupWin.isDestroyed()) {
     setupWin.setTitle(i18n.t(lang, '到点 · 第一次设置'));
@@ -477,7 +481,7 @@ function buildMenu(kind) {
       }
       if (!ended) {
         return [
-          { label: tr('打卡下班'), click: () => punch('out') },
+          { label: tr('打卡下班'), click: () => openPunchConfirm() },
           { label: tr('撤销今日打卡'), click: () => clearPunch() }
         ];
       }
@@ -489,6 +493,7 @@ function buildMenu(kind) {
           }),
           enabled: false
         },
+        { label: tr('修改今日打卡…'), click: () => openPunchConfirm() },
         { label: tr('撤销今日打卡'), click: () => clearPunch() }
       ];
     })(),
@@ -1105,6 +1110,60 @@ function openStats() {
   });
 }
 
+function openPunchConfirm() {
+  if (!cfg || !cfg.onboarded) return false;
+  const now = new Date();
+  const today = isoDate(now);
+  if (cfg.punchDate !== today || cfg.punchIn == null) return false;
+  if (punchWin && !punchWin.isDestroyed()) {
+    if (punchWin.isMinimized()) punchWin.restore();
+    punchWin.show();
+    punchWin.focus();
+    return true;
+  }
+  const bounds =
+    win && !win.isDestroyed()
+      ? win.getBounds()
+      : screen.getPrimaryDisplay().workArea;
+  const wa = screen.getDisplayMatching(bounds).workArea;
+  const width = 400;
+  const height = 330;
+  punchWin = new BrowserWindow({
+    width,
+    height,
+    x: Math.round(wa.x + (wa.width - width) / 2),
+    y: Math.round(wa.y + (wa.height - height) / 2),
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    title: tr('到点 · 确认打卡'),
+    icon: asset('icon.png'),
+    backgroundColor: '#f3ede2',
+    parent: win && !win.isDestroyed() ? win : undefined,
+    modal: true,
+    alwaysOnTop: true,
+    autoHideMenuBar: true,
+    show: false,
+    webPreferences: {
+      preload: preload(),
+      contextIsolation: true,
+      nodeIntegration: false,
+      spellcheck: false
+    }
+  });
+  punchWin.setMenu(null);
+  punchWin.loadFile(path.join(__dirname, '..', 'src', 'punch.html'));
+  punchWin.once('ready-to-show', () => {
+    punchWin.show();
+    punchWin.focus();
+  });
+  punchWin.on('closed', () => {
+    punchWin = null;
+  });
+  return true;
+}
+
 function showSetup() {
   if (setupWin && !setupWin.isDestroyed()) {
     setupWin.show();
@@ -1204,6 +1263,53 @@ function registerIpc() {
   }));
 
   ipcMain.handle('punch:mark', (event, kind) => punch(kind === 'out' ? 'out' : 'in'));
+  ipcMain.handle('punch:confirm-open', () => openPunchConfirm());
+  ipcMain.handle('punch:draft', () => {
+    if (!cfg) return null;
+    const now = new Date();
+    const today = isoDate(now);
+    if (cfg.punchDate !== today || cfg.punchIn == null) return null;
+    return {
+      date: today,
+      punchIn: cfg.punchIn,
+      punchOut: cfg.punchOut != null ? cfg.punchOut : now.getHours() * 60 + now.getMinutes(),
+      existing: cfg.punchOut != null,
+      language: cfg.language
+    };
+  });
+  ipcMain.handle('punch:confirm', (event, payload) => {
+    const now = new Date();
+    const today = isoDate(now);
+    if (!cfg || cfg.punchDate !== today || cfg.punchIn == null) {
+      return { ok: false, error: 'PUNCH_MISSING' };
+    }
+    const punchIn = Math.round(Number(payload && payload.punchIn));
+    const punchOut = Math.round(Number(payload && payload.punchOut));
+    if (
+      !Number.isFinite(punchIn) ||
+      !Number.isFinite(punchOut) ||
+      punchIn < 0 ||
+      punchIn > 1439 ||
+      punchOut < 0 ||
+      punchOut > 1439
+    ) {
+      return { ok: false, error: 'PUNCH_INVALID' };
+    }
+    if (punchOut < punchIn) {
+      return { ok: false, error: 'PUNCH_ORDER' };
+    }
+    const alreadyOut = cfg.punchOut != null;
+    cfg = store.save({ punchDate: today, punchIn, punchOut });
+    broadcastConfig();
+    refreshMenus();
+    if (punchWin && !punchWin.isDestroyed()) punchWin.close();
+    if (!alreadyOut && win && !win.isDestroyed()) {
+      setTimeout(() => {
+        if (win && !win.isDestroyed()) win.webContents.send('punch:celebrate');
+      }, 120);
+    }
+    return { ok: true };
+  });
   ipcMain.handle('punch:clear', () => clearPunch());
   ipcMain.handle('stats:record', (event, entry) => stats.record(entry));
   ipcMain.handle('stats:get', () => stats.list());
