@@ -1,0 +1,68 @@
+{
+  "name": "daodian",
+  "productName": "到点",
+  "version": "0.1.0",
+  "description": "A Windows desktop salary-ticker widget: watch today's pay fill up, and see your hourly rate dilute when you work overtime.",
+  "main": "electron/main.js",
+  "author": "Feitong Jiang",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pumatlarge/daodian.git"
+  },
+  "homepage": "https://github.com/Pumatlarge/daodian#readme",
+  "bugs": {
+    "url": "https://github.com/Pumatlarge/daodian/issues"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "test": "node tests/calc.test.js",
+    "dist": "electron-builder --win nsis portable"
+  },
+  "devDependencies": {
+    "electron": "^45.3.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.daodian.widget",
+    "productName": "到点",
+    "copyright": "Copyright © 2026 Feitong Jiang",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "shared/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "到点",
+      "deleteAppDataOnUninstall": false,
+      "language": "2052",
+      "installerLanguages": [
+        "zh_CN",
+        "en_US"
+      ],
+      "artifactName": "Daodian-${version}-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "Daodian-${version}-Portable.${ext}"
+    }
+  }
+}

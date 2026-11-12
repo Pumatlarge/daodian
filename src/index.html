@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>到点</title>
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/themes.css" />
+  </head>
+  <body>
+    <div id="app" data-theme="cream" data-layout="bar">
+      <div class="widget" id="widget">
+        <div class="bg-layer"></div>
+        <div class="hover-tools">
+          <button class="tool" id="btn-eye" type="button" title="隐私模式" aria-label="隐私模式"></button>
+          <button class="tool" id="btn-tuck" type="button" title="自动收纳到边缘" aria-label="自动收纳到边缘"></button>
+          <button class="tool" id="btn-settings" type="button" title="设置" aria-label="设置"></button>
+        </div>
+        <div id="content"></div>
+      </div>
+      <div class="tuck-tab" id="tuckTab" aria-hidden="true"></div>
+    </div>
+    <script src="../shared/calc.js"></script>
+    <script src="../shared/themes.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

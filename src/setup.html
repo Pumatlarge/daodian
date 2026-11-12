@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>到点 · 第一次设置</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body class="setup">
+    <div class="setup-shell">
+      <header class="head">
+        <div class="eyebrow">第一次见面</div>
+        <h1>先认识一下你的工资</h1>
+        <p class="sub">填完这三步，“到点”就会在桌面替你数钱。所有数据只留在本机。</p>
+        <div class="steps">
+          <span class="step active" data-step="1">1</span>
+          <span class="step" data-step="2">2</span>
+          <span class="step" data-step="3">3</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="panel" data-panel="1">
+          <h2>你的时间值多少钱</h2>
+          <div class="grid2">
+            <label class="field">
+              <span>税后月薪</span>
+              <div class="wrap">
+                <input id="sSalary" type="number" min="0" step="100" inputmode="decimal" />
+                <em class="unit">元</em>
+              </div>
+            </label>
+            <label class="field">
+              <span>每月计薪天数</span>
+              <div class="wrap">
+                <input id="sPayDays" type="number" min="1" max="31" step="0.25" inputmode="decimal" />
+                <em class="unit">天</em>
+              </div>
+            </label>
+            <label class="field">
+              <span>工作日</span>
+              <select id="sPattern">
+                <option value="five_two">固定双休（周一至周五）</option>
+                <option value="big_small">大小周</option>
+                <option value="six_one">单休（周一至周六）</option>
+              </select>
+            </label>
+          </div>
+          <label class="inline-check" id="sBigRow">
+            <input id="sBigWeek" type="checkbox" />
+            本周六上班（大周）
+          </label>
+          <p class="hint">21.75 是常用月计薪天数；按实际出勤算的话填 22 或当月工作日。</p>
+          <div class="preview">
+            <span id="sSalaryPreview">日薪 ¥367.82</span>
+            <b id="sHourlyPreview">¥45.98 / 小时</b>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="2" hidden>
+          <h2>几点上班，几点自由</h2>
+          <div class="grid2">
+            <label class="field">
+              <span>上班时间</span>
+              <input id="sStart" type="time" />
+            </label>
+            <label class="field">
+              <span>下班时间</span>
+              <input id="sEnd" type="time" />
+            </label>
+            <label class="field">
+              <span>午休开始</span>
+              <input id="sLunch" type="time" />
+            </label>
+            <label class="field">
+              <span>午休时长</span>
+              <div class="wrap">
+                <input id="sLunchMin" type="number" min="0" max="480" step="5" />
+                <em class="unit">分钟</em>
+              </div>
+            </label>
+          </div>
+          <p class="hint">午休期间工资暂停累计；加班后时薪会按“日薪 ÷ 总工时”自动稀释。</p>
+          <div class="preview">
+            <span id="sPreviewText">每天有效工时 8 小时</span>
+            <b id="sPreviewHourly">¥45.98 / 小时</b>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="3" hidden>
+          <h2>先挑一套气质</h2>
+          <div class="grid2">
+            <label class="field">
+              <span>切换方式</span>
+              <select id="sMode">
+                <option value="time">跟随时间（推荐）</option>
+                <option value="system">跟随系统深浅色</option>
+                <option value="manual">固定一套</option>
+              </select>
+            </label>
+            <div class="field" id="sRangeField">
+              <span>白天时段</span>
+              <div class="range-row">
+                <input id="sDayStart" type="time" />
+                <span class="hint" style="margin:0">到</span>
+                <input id="sDayEnd" type="time" />
+              </div>
+            </div>
+            <label class="field" id="sDayField">
+              <span>白天皮肤</span>
+              <select id="sDayTheme"></select>
+            </label>
+            <label class="field" id="sNightField">
+              <span>夜间皮肤</span>
+              <select id="sNightTheme"></select>
+            </label>
+            <label class="field" id="sManualField">
+              <span>固定皮肤</span>
+              <select id="sManualTheme"></select>
+            </label>
+          </div>
+          <div class="theme-strip" id="sThemeStrip"></div>
+          <p class="hint">6 套皮肤都会内置，之后随时可以换；白天默认奶油手账，晚上默认赛博霓虹。</p>
+        </section>
+
+        <p class="form-error" id="sError"></p>
+      </main>
+
+      <div class="setup-nav">
+        <button class="btn ghost" id="btnBack" type="button" disabled>上一步</button>
+        <span class="hint" id="sHint">第 1 步，共 3 步</span>
+        <button class="btn primary" id="btnNext" type="button">下一步</button>
+      </div>
+    </div>
+
+    <script src="../shared/calc.js"></script>
+    <script src="../shared/themes.js"></script>
+    <script src="setup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,450 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  display: flex;
+}
+
+.widget {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border-radius: var(--radius, 16px);
+  background: var(--bg, #fbf4e6);
+  color: var(--fg, #4a3a28);
+  border: var(--border-width, 1px) solid var(--border, #e6d7bd);
+  box-shadow: var(--shadow, 0 10px 24px rgba(0, 0, 0, 0.2));
+  padding: 12px 15px 10px;
+  overflow: hidden;
+  -webkit-app-region: drag;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.26s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+#content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: var(--bg-image, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.widget.has-bg .bg-layer {
+  opacity: 0.3;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 17px;
+  flex: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  color: var(--brand);
+  white-space: nowrap;
+}
+
+.brand-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent, #d18957);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent, #d18957) 65%, transparent);
+  flex: none;
+}
+
+.pill {
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  padding: 1px 7px;
+  border-radius: 99px;
+  color: var(--pill-fg);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.label {
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--label);
+  margin-bottom: 1px;
+  white-space: nowrap;
+}
+
+.amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 7px;
+  min-height: 1.55rem;
+}
+
+.amount {
+  font-family: var(--amount-font, inherit);
+  font-weight: 650;
+  font-size: 1.55rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--amount);
+  text-shadow: var(--amount-shadow, none);
+  white-space: nowrap;
+}
+
+.target {
+  font-size: 0.64rem;
+  color: var(--target);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pct {
+  margin-left: auto;
+  font-size: 0.6rem;
+  color: var(--pct);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bar {
+  height: var(--bar-height, 7px);
+  border-radius: var(--bar-radius, 99px);
+  background: var(--bar-bg);
+  border: var(--bar-border, 0);
+  overflow: hidden;
+  margin-bottom: 7px;
+  flex: none;
+  padding: var(--bar-padding, 0);
+}
+
+.bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--bar-radius, 99px);
+  background: var(--bar-fill);
+  box-shadow: var(--bar-glow, none);
+  transition: width 0.2s linear;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.58rem;
+  color: var(--foot);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+  min-height: 0.7rem;
+}
+
+.foot > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ot-strip {
+  display: none;
+  flex-direction: column;
+  gap: 3px;
+  margin: 3px 0 6px;
+}
+
+.ot-strip.show {
+  display: flex;
+}
+
+.ot-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 0.58rem;
+  color: var(--foot);
+  white-space: nowrap;
+}
+
+.ot-row b {
+  font-size: 0.8rem;
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.ot-strip.warn .ot-row b {
+  color: var(--warn);
+}
+
+.ot-strip.bad .ot-row b {
+  color: var(--bad);
+}
+
+.ot-row em {
+  font-style: normal;
+  font-size: 0.54rem;
+  color: var(--delta);
+  font-variant-numeric: tabular-nums;
+}
+
+.ot-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bar-bg);
+  overflow: hidden;
+}
+
+.ot-bar > i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--ok);
+  transition: width 0.3s linear, background-color 0.3s;
+}
+
+.ot-strip.warn .ot-bar > i {
+  background: var(--warn);
+}
+
+.ot-strip.bad .ot-bar > i {
+  background: var(--bad);
+}
+
+.hover-tools {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  -webkit-app-region: no-drag;
+}
+
+.widget:hover .hover-tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.widget:hover .pill {
+  opacity: 0;
+}
+
+.tuck-tab {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  width: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-solid, var(--bg));
+  border: var(--border-width, 1px) solid var(--border);
+  box-shadow: var(--shadow);
+  color: var(--accent, #d18957);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 20;
+  pointer-events: none;
+  -webkit-app-region: drag;
+}
+
+#app[data-tuck] .tuck-tab {
+  display: flex;
+}
+
+#app[data-tuck] .widget {
+  visibility: hidden;
+}
+
+#app[data-tuck="right"] .tuck-tab {
+  left: 0;
+  border-right: 0;
+  border-radius: var(--radius, 10px) 0 0 var(--radius, 10px);
+}
+
+#app[data-tuck="left"] .tuck-tab {
+  right: 0;
+  border-left: 0;
+  border-radius: 0 var(--radius, 10px) var(--radius, 10px) 0;
+}
+
+#app[data-tuck="right"] .tuck-tab::after {
+  content: "‹";
+}
+
+#app[data-tuck="left"] .tuck-tab::after {
+  content: "›";
+}
+
+.tuck-tab::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--accent, #d18957);
+  box-shadow: 0 0 8px var(--accent, #d18957);
+}
+
+#app[data-tuck="right"] .tuck-tab::before {
+  left: 2px;
+}
+
+#app[data-tuck="left"] .tuck-tab::before {
+  right: 2px;
+}
+
+.tool {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-solid, var(--bg)) 55%, transparent);
+  color: var(--foot);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.tool:hover {
+  color: var(--amount);
+  background: color-mix(in srgb, var(--accent, #d18957) 20%, transparent);
+}
+
+.tool.active {
+  color: var(--bad, #c05a4a);
+}
+
+.tool.on {
+  color: var(--accent, #d18957);
+  background: color-mix(in srgb, var(--accent, #d18957) 18%, transparent);
+}
+
+.tool svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+.is-rest .amount {
+  font-family: var(--font, inherit);
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  color: var(--brand);
+  text-shadow: none;
+}
+
+.is-rest .bar,
+.is-rest .ot-strip,
+.is-rest .target,
+.is-rest .pct,
+.is-rest .goal {
+  display: none !important;
+}
+
+.is-rest .foot {
+  justify-content: flex-start;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 5px;
+  height: 9px;
+  border-radius: 1px;
+  z-index: 7;
+  pointer-events: none;
+  animation: confetti-fall 2s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(200px) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+.widget.celebrate {
+  animation: celebrate-pulse 1.1s ease 2;
+}
+
+@keyframes celebrate-pulse {
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #d18957) 30%, transparent),
+      var(--shadow, 0 10px 24px rgba(0, 0, 0, 0.2));
+  }
+}

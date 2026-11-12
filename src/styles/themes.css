@@ -1,0 +1,486 @@
+/* ── 奶油手账 ─────────────────────────────────────────────── */
+[data-theme="cream"] {
+  --bg: #fbf4e6;
+  --bg-solid: #fbf4e6;
+  --fg: #4a3a28;
+  --border: #e6d7bd;
+  --border-width: 1px;
+  --radius: 16px;
+  --shadow: 0 2px 5px rgba(80, 55, 20, 0.16);
+  --brand: #8a6a45;
+  --accent: #d18957;
+  --pill-bg: #f5ead6;
+  --pill-fg: #8a6a45;
+  --pill-border: #dcc9a8;
+  --label: #a3855f;
+  --amount: #3f6b52;
+  --amount-font: Georgia, "Songti SC", "SimSun", serif;
+  --target: #a3855f;
+  --pct: #a3855f;
+  --bar-bg: #ecdfc8;
+  --bar-fill: linear-gradient(90deg, color-mix(in srgb, var(--accent) 62%, #ffffff), var(--accent));
+  --bar-height: 8px;
+  --bar-radius: 99px;
+  --foot: #9a8465;
+  --ot-rate: #b5563f;
+  --delta: #c0705a;
+  --ok: #6f9d7c;
+  --warn: #d19a3f;
+  --bad: #c05a4a;
+}
+
+[data-theme="cream"] .foot {
+  border-top: 1px dashed #e0d2ba;
+  padding-top: 5px;
+}
+
+[data-theme="cream"] .widget {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(120, 90, 50, 0.022) 0,
+    rgba(120, 90, 50, 0.022) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+/* ── 赛博霓虹 ─────────────────────────────────────────────── */
+[data-theme="neon"] {
+  --bg: #05070e;
+  --bg-solid: #05070e;
+  --fg: #d8faff;
+  --border: rgba(0, 229, 255, 0.32);
+  --border-width: 1px;
+  --radius: 8px;
+  --shadow: 0 0 8px rgba(0, 229, 255, 0.18), inset 0 0 22px rgba(255, 47, 208, 0.05);
+  --brand: #00e5ff;
+  --accent: #00e5ff;
+  --pill-bg: rgba(255, 95, 220, 0.08);
+  --pill-fg: #ff5fdc;
+  --pill-border: rgba(255, 95, 220, 0.5);
+  --label: rgba(180, 240, 255, 0.55);
+  --amount: #ffffff;
+  --amount-font: ui-monospace, Consolas, "Microsoft YaHei", monospace;
+  --target: rgba(180, 240, 255, 0.45);
+  --pct: rgba(180, 240, 255, 0.45);
+  --bar-bg: rgba(0, 229, 255, 0.08);
+  --bar-fill: linear-gradient(90deg, var(--accent), #4d7cff 55%, #ff2fd0);
+  --bar-height: 7px;
+  --bar-radius: 2px;
+  --bar-glow: 0 0 12px rgba(0, 229, 255, 0.7);
+  --foot: rgba(180, 240, 255, 0.45);
+  --ot-rate: #ffd166;
+  --delta: #ff8a7a;
+  --ok: #00e5ff;
+  --warn: #ffb020;
+  --bad: #ff4d6d;
+}
+
+[data-theme="neon"] .widget::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+  background-size: 15px 15px;
+  pointer-events: none;
+}
+
+[data-theme="neon"] .widget::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  z-index: 0;
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+[data-theme="neon"] .brand,
+[data-theme="neon"] .amount,
+[data-theme="neon"] .ot-row b {
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.55);
+}
+
+[data-theme="neon"] .pill {
+  text-shadow: 0 0 8px rgba(255, 95, 220, 0.6);
+}
+
+[data-theme="neon"] .brand-dot {
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.9);
+}
+
+/* ── 像素打工人 ───────────────────────────────────────────── */
+[data-theme="pixel"] {
+  --bg: #11151c;
+  --bg-solid: #11151c;
+  --fg: #d6ffe2;
+  --border: #6ee787;
+  --border-width: 2px;
+  --radius: 0px;
+  --shadow: 4px 4px 0 rgba(110, 231, 135, 0.18);
+  --brand: #6ee787;
+  --accent: #6ee787;
+  --pill-bg: #6ee787;
+  --pill-fg: #11151c;
+  --pill-border: #6ee787;
+  --label: #8fb99a;
+  --amount: #ffffff;
+  --amount-font: ui-monospace, Consolas, "Microsoft YaHei", monospace;
+  --amount-shadow: 2px 2px 0 #2c6b43;
+  --target: #7fa38a;
+  --pct: #7fa38a;
+  --bar-bg: #0a0d12;
+  --bar-border: 1px solid #33513f;
+  --bar-padding: 1px;
+  --bar-fill: repeating-linear-gradient(90deg, var(--accent) 0 7px, transparent 7px 9px);
+  --bar-height: 11px;
+  --bar-radius: 0px;
+  --foot: #7fa38a;
+  --ot-rate: #ffd166;
+  --delta: #ff8a7a;
+  --ok: #6ee787;
+  --warn: #ffd166;
+  --bad: #ff6b6b;
+}
+
+[data-theme="pixel"] .widget {
+  box-shadow: 4px 4px 0 rgba(110, 231, 135, 0.18);
+}
+
+[data-theme="pixel"] .brand {
+  letter-spacing: 0.18em;
+}
+
+[data-theme="pixel"] .pxart {
+  width: 16px;
+  height: 16px;
+  display: block;
+  margin-right: 1px;
+}
+
+/* ── 玻璃存钱罐 ───────────────────────────────────────────── */
+[data-theme="jar"] {
+  --bg: linear-gradient(150deg, #fffaf0, #ffedd8);
+  --bg-solid: #fff4e3;
+  --fg: #5a4127;
+  --border: rgba(205, 165, 105, 0.45);
+  --border-width: 1px;
+  --radius: 20px;
+  --shadow: 0 2px 5px rgba(120, 80, 30, 0.16);
+  --brand: #a8792f;
+  --accent: #e0a53c;
+  --pill-bg: #f8e6c8;
+  --pill-fg: #9a6a1f;
+  --pill-border: #e6cfa4;
+  --label: #a98a5b;
+  --amount: #8a5a1f;
+  --amount-font: Georgia, "Songti SC", "SimSun", serif;
+  --target: #a98a5b;
+  --pct: #a98a5b;
+  --bar-bg: #f0e0c6;
+  --bar-fill: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, #ffffff), var(--accent));
+  --bar-height: 7px;
+  --bar-radius: 99px;
+  --foot: #9a825f;
+  --ot-rate: #b5563f;
+  --delta: #c0705a;
+  --ok: #7aa06f;
+  --warn: #d19a3f;
+  --bad: #c05a4a;
+}
+
+[data-layout="jar"] .top {
+  margin-bottom: 2px;
+}
+
+[data-layout="jar"] .jar-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+
+[data-layout="jar"] .jar-main {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-layout="jar"] .amount-row {
+  margin-bottom: 1px;
+  min-height: 1.55rem;
+}
+
+[data-layout="jar"] .goal {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.58rem;
+  color: var(--target);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+[data-layout="jar"] .goal .pct {
+  margin-left: auto;
+  font-size: 0.56rem;
+  color: var(--pct);
+}
+
+[data-layout="jar"] .jar-box {
+  width: 64px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-layout="jar"] .jar-svg {
+  width: 58px;
+  height: 72px;
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(160, 110, 40, 0.18));
+}
+
+[data-layout="jar"] .ot-mini {
+  display: none;
+  font-size: 0.56rem;
+  color: var(--foot);
+  margin-top: 2px;
+  white-space: nowrap;
+  align-items: baseline;
+  gap: 4px;
+}
+
+[data-layout="jar"] .ot-mini.show {
+  display: flex;
+}
+
+[data-layout="jar"] .ot-mini b {
+  font-size: 0.7rem;
+  color: var(--ot-rate);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="jar"] .ot-mini em {
+  font-style: normal;
+  color: var(--delta);
+  font-size: 0.54rem;
+}
+
+[data-layout="jar"] .foot {
+  border-top: 1px dashed #e7d4b4;
+  padding-top: 4px;
+  margin-top: 3px;
+}
+
+/* ── 复古工资条 ───────────────────────────────────────────── */
+[data-theme="receipt"] {
+  --bg: #fcfaf3;
+  --bg-solid: #fcfaf3;
+  --fg: #332f29;
+  --border: #e6e0d0;
+  --border-width: 1px;
+  --radius: 4px;
+  --shadow: 0 2px 5px rgba(60, 50, 30, 0.18);
+  --brand: #8b8374;
+  --accent: #b94335;
+  --pill-bg: transparent;
+  --pill-fg: #8b8374;
+  --pill-border: transparent;
+  --label: #8b8374;
+  --amount: #26231d;
+  --amount-font: ui-monospace, Consolas, "Microsoft YaHei", monospace;
+  --target: #5c5548;
+  --pct: #8b8374;
+  --bar-bg: #e9e3d5;
+  --bar-fill: repeating-linear-gradient(90deg, #4b4438 0 5px, transparent 5px 7px);
+  --bar-height: 8px;
+  --bar-radius: 0px;
+  --foot: #8b8374;
+  --ot-rate: #b94335;
+  --delta: #b94335;
+  --ok: #6f7d5e;
+  --warn: #b8863e;
+  --bad: #b94335;
+}
+
+[data-layout="receipt"] .widget {
+  padding: 10px 13px 8px;
+  font-family: ui-monospace, Consolas, "Microsoft YaHei", monospace;
+}
+
+[data-layout="receipt"] .rtop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: #8b8374;
+  white-space: nowrap;
+  margin-bottom: 5px;
+}
+
+[data-layout="receipt"] .rtop .pill {
+  font-size: 0.55rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8b8374;
+}
+
+[data-layout="receipt"] .rdash {
+  border-top: 1px dashed #c9c1af;
+  margin-bottom: 3px;
+}
+
+[data-layout="receipt"] .rline {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 0.58rem;
+  margin: 2px 0;
+  color: #5c5548;
+  white-space: nowrap;
+}
+
+[data-layout="receipt"] .rline .dots {
+  flex: 1;
+  height: 0.5em;
+  border-bottom: 1px dotted #b8af9d;
+}
+
+[data-layout="receipt"] .rline b {
+  font-size: 1.08rem;
+  color: #26231d;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="receipt"] .rbar {
+  height: 8px;
+  background: var(--bar-bg);
+  overflow: hidden;
+  margin: 5px 0 4px;
+}
+
+[data-layout="receipt"] .rbar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--bar-fill);
+  transition: width 0.2s linear;
+}
+
+[data-layout="receipt"] .ot-line {
+  display: none;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.55rem;
+  color: var(--ot-rate);
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+
+[data-layout="receipt"] .ot-line.show {
+  display: flex;
+}
+
+[data-layout="receipt"] .ot-line b {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="receipt"] .ot-line em {
+  font-style: normal;
+  font-size: 0.52rem;
+}
+
+[data-layout="receipt"] .rfoot {
+  font-size: 0.52rem;
+  color: #8b8374;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 74%;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-layout="receipt"] .rstamp {
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.46rem;
+  font-weight: 700;
+  line-height: 1.1;
+  transform: rotate(-13deg);
+  opacity: 0.72;
+  z-index: 3;
+  font-family: ui-monospace, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
+[data-layout="receipt"] .is-rest .rstamp {
+  display: none;
+}
+
+/* ── 猫咪陪伴 ─────────────────────────────────────────────── */
+[data-theme="cat"] {
+  --bg: #fff8fb;
+  --bg-solid: #fff8fb;
+  --fg: #4a3b56;
+  --border: #edd9e8;
+  --border-width: 1px;
+  --radius: 22px;
+  --shadow: 0 2px 5px rgba(120, 90, 140, 0.16);
+  --brand: #8a6aa8;
+  --accent: #b9a3ff;
+  --pill-bg: #f3e8fb;
+  --pill-fg: #8a6aa8;
+  --pill-border: #e3d2f2;
+  --label: #a08bb2;
+  --amount: #6b4a86;
+  --amount-font: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  --target: #a08bb2;
+  --pct: #a08bb2;
+  --bar-bg: #f0e4f2;
+  --bar-fill: linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, #ffb3c8), var(--accent));
+  --bar-height: 9px;
+  --bar-radius: 99px;
+  --foot: #9d8aad;
+  --ot-rate: #8a5fa8;
+  --delta: #b06a8a;
+  --ok: #8fbf9a;
+  --warn: #d9a45c;
+  --bad: #c97a86;
+}
+
+[data-theme="cat"] .foot {
+  padding-right: 56px;
+}
+
+[data-theme="cat"] .cat-svg {
+  position: absolute;
+  right: 5px;
+  bottom: 0;
+  width: 58px;
+  height: 42px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+[data-theme="cat"] .widget:hover .cat-svg {
+  opacity: 0.85;
+}

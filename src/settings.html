@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>到点 · 设置</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <header class="head">
+      <div>
+        <div class="eyebrow">DAODIAN</div>
+        <h1>到点 · 设置</h1>
+        <p class="sub">
+          工资、工时、皮肤与显示都在这里。
+          <span class="chip" id="effectiveChip">当前：奶油手账</span>
+        </p>
+      </div>
+      <button class="btn ghost" id="btnClose" type="button">关闭</button>
+    </header>
+
+    <main>
+      <section>
+        <h2>收入与工时</h2>
+        <div class="grid2">
+          <label class="field">
+            <span>税后月薪</span>
+            <div class="wrap">
+              <input id="salary" type="number" min="0" step="100" inputmode="decimal" />
+              <em class="unit">元</em>
+            </div>
+          </label>
+          <label class="field">
+            <span>每月计薪天数</span>
+            <div class="wrap">
+              <input id="payDays" type="number" min="1" max="31" step="0.25" inputmode="decimal" />
+              <em class="unit">天</em>
+            </div>
+          </label>
+          <label class="field">
+            <span>工作日</span>
+            <select id="workPattern">
+              <option value="five_two">固定双休（周一至周五）</option>
+              <option value="big_small">大小周</option>
+              <option value="six_one">单休（周一至周六）</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>加班计薪</span>
+            <select id="overtimeMode">
+              <option value="dilute">时薪稀释（月薪制，推荐）</option>
+              <option value="pay">按 1.5 倍累计加班费</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>上班时间</span>
+            <input id="workStart" type="time" />
+          </label>
+          <label class="field">
+            <span>下班时间</span>
+            <input id="workEnd" type="time" />
+          </label>
+          <label class="field">
+            <span>午休开始</span>
+            <input id="lunchStart" type="time" />
+          </label>
+          <label class="field">
+            <span>午休时长</span>
+            <div class="wrap">
+              <input id="lunchMinutes" type="number" min="0" max="480" step="5" />
+              <em class="unit">分钟</em>
+            </div>
+          </label>
+        </div>
+        <label class="inline-check" id="bigWeekRow">
+          <input id="bigWeek" type="checkbox" />
+          本周六上班（大周）
+        </label>
+        <p class="hint" id="rateHint"></p>
+        <div class="preview">
+          <span id="previewText">日薪 ¥367.82 · 每天有效工时 8 小时</span>
+          <b id="previewHourly">¥45.98 / 小时</b>
+        </div>
+        <p class="form-error" id="scheduleError"></p>
+      </section>
+
+      <section>
+        <h2>皮肤与切换</h2>
+        <div class="effective" id="effectiveRow">
+          <span id="effectiveText">当前生效：奶油手账 · 跟随时间</span>
+          <button class="link" id="btnAuto" type="button">恢复自动切换</button>
+        </div>
+        <div class="grid2">
+          <label class="field">
+            <span>切换方式</span>
+            <select id="themeMode">
+              <option value="time">跟随时间（白天 / 夜间）</option>
+              <option value="system">跟随系统深浅色</option>
+              <option value="manual">手动锁定</option>
+            </select>
+          </label>
+          <div class="field" id="dayRangeField">
+            <span>白天时段</span>
+            <div class="range-row">
+              <input id="dayStart" type="time" />
+              <span class="hint" style="margin:0">到</span>
+              <input id="dayEnd" type="time" />
+            </div>
+          </div>
+          <label class="field">
+            <span>白天皮肤</span>
+            <select id="dayTheme"></select>
+          </label>
+          <label class="field">
+            <span>夜间皮肤</span>
+            <select id="nightTheme"></select>
+          </label>
+        </div>
+        <div class="theme-grid" id="themeGrid"></div>
+      </section>
+
+      <section>
+        <h2>外观自定义</h2>
+        <div class="grid2">
+          <label class="field">
+            <span>自定义哪套皮肤</span>
+            <select id="customizeTheme"></select>
+          </label>
+          <label class="field">
+            <span>字体</span>
+            <select id="font">
+              <option value="">跟随主题</option>
+              <option value="system">系统无衬线</option>
+              <option value="serif">衬线 / 宋体</option>
+              <option value="mono">等宽 / 代码</option>
+            </select>
+          </label>
+          <div class="field">
+            <span>强调色</span>
+            <div class="range-row">
+              <input id="accent" type="color" style="height:36px;padding:2px;flex:1" />
+              <button class="link" id="btnAccentReset" type="button">跟随主题</button>
+            </div>
+          </div>
+          <label class="field">
+            <span>圆角</span>
+            <div class="range-row">
+              <input id="radius" type="range" min="0" max="30" step="1" />
+              <output id="radiusOut">16px</output>
+            </div>
+          </label>
+          <div class="field">
+            <span>背景图片</span>
+            <div class="bg-row">
+              <div class="bg-preview" id="bgPreview">无</div>
+              <button class="btn ghost small" id="btnPickBg" type="button">选择图片</button>
+              <button class="link" id="btnClearBg" type="button">清除</button>
+            </div>
+          </div>
+          <label class="field">
+            <span>字号</span>
+            <div class="range-row">
+              <input id="fontSize" type="range" min="0.85" max="1.15" step="0.05" />
+              <output id="fontSizeOut">100%</output>
+            </div>
+          </label>
+          <label class="field">
+            <span>窗口透明度</span>
+            <div class="range-row">
+              <input id="opacity" type="range" min="0.5" max="1" step="0.05" />
+              <output id="opacityOut">100%</output>
+            </div>
+          </label>
+        </div>
+        <p class="hint">背景图片会复制到本地数据目录，原图移动或删除都不影响；每套皮肤单独记忆。</p>
+      </section>
+
+      <section>
+        <h2>显示与隐私</h2>
+        <div class="switch">
+          <div class="txt"><b>显示目标金额</b><small>金额旁边显示今日目标</small></div>
+          <input id="showTarget" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>显示百分比</b><small>进度条旁边显示完成比例</small></div>
+          <input id="showPercent" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>显示剩余时间</b><small>距离下班、加班时长</small></div>
+          <input id="showRemaining" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>显示时薪</b><small>底部显示正常时薪 / 加班实际时薪</small></div>
+          <input id="showHourly" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>显示加班时薪条</b><small>下班后显示时薪稀释进度</small></div>
+          <input id="showOvertime" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>隐私模式</b><small>把金额换成 ¥•••，只保留进度</small></div>
+          <input id="privacy" type="checkbox" />
+        </div>
+      </section>
+
+      <section>
+        <h2>桌面与提醒</h2>
+        <div class="switch">
+          <div class="txt"><b>窗口置顶</b><small>始终显示在其他窗口上方</small></div>
+          <input id="alwaysOnTop" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>开机自启</b><small>登录 Windows 后自动打开到点（免安装版可能受路径限制）</small></div>
+          <input id="autostart" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>到点通知</b><small>下班时发一条 Windows 通知</small></div>
+          <input id="notify" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>到点音效</b><small>金币到账的三声轻响</small></div>
+          <input id="sound" type="checkbox" />
+        </div>
+        <div class="switch">
+          <div class="txt"><b>边缘自动收纳</b><small>鼠标离开后滑到最近的左 / 右屏幕边缘，只留一条边；移过去会重新展开</small></div>
+          <input id="autoTuck" type="checkbox" />
+        </div>
+        <div class="field tuck-delay" id="tuckDelayField">
+          <span>收纳延迟</span>
+          <div class="range-row">
+            <input id="tuckDelay" type="range" min="1" max="10" step="1" />
+            <output id="tuckDelayOut">3s</output>
+          </div>
+        </div>
+        <p class="hint">快捷键：<b>Ctrl + Shift + H</b> 隐藏 / 显示小组件；右键小组件或托盘图标可以快速换肤、调透明度、切隐私模式。</p>
+      </section>
+    </main>
+
+    <div class="foot-note">
+      <span>到点 · 所有数据仅保存在本机</span>
+      <span>·</span>
+      <button class="link" id="btnData" type="button">打开数据目录</button>
+      <span>·</span>
+      <button class="link danger" id="btnQuit" type="button">退出到点</button>
+    </div>
+
+    <div class="toast" id="toast">已保存</div>
+
+    <script src="../shared/calc.js"></script>
+    <script src="../shared/themes.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>
