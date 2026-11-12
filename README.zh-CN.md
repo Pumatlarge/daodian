@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.3.2" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.3.0" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -64,8 +64,8 @@
 
 | 版本 | 文件 | 说明 |
 | --- | --- | --- |
-| 安装包 | [Daodian-0.3.2-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.2/Daodian-0.3.2-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
-| 便携版 | [Daodian-0.3.2-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.2/Daodian-0.3.2-Portable.exe) | 单文件，免安装 |
+| 安装包 | [Daodian-0.3.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
+| 便携版 | [Daodian-0.3.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Portable.exe) | 单文件，免安装 |
 
 [全部版本](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -85,7 +85,7 @@
 2. **时间** —— 上班、下班、午休开始和午休时长。默认 09:00–18:30，午休 90 分钟。
 3. **皮肤** —— 白天皮肤、夜间皮肤，以及跟随时间 / 跟随系统 / 固定一套。
 
-工作日模式支持固定双休、大小周、单休。设置完成后小组件出现在屏幕右下角，拖到顺手的位置就好。
+想用英文界面，可以在引导页右上角直接切到 English；默认中文。工作日模式支持固定双休、大小周、单休。设置完成后小组件出现在屏幕右下角，拖到顺手的位置就好。
 
 ## 钱是怎么算的
 
@@ -100,6 +100,7 @@
 - 下班后实际时薪会随着加班时间下降；时薪下面的细条就是 `实际时薪 ÷ 正常时薪`。
 - **1.5 倍加班费模式**下，工资按 `正常时薪 × 1.5` 继续累计，不再稀释。
 - 非工作日会切到安静的「今天休息」状态，并显示下次上班时间。
+- 使用按打卡计薪时，一天从上班打卡开始、下班打卡结束（还没下班就按当前时间继续算），并应用设置的迟到 / 早退宽限；不打卡的日子仍然按班次计算。
 
 ## 设置
 
@@ -161,10 +162,10 @@ npm run dist     # 同时构建安装包和便携版
 输出：
 
 ```text
-dist/Daodian-0.3.2-Setup.exe
-dist/Daodian-0.3.2-Setup.exe.blockmap
+dist/Daodian-0.3.0-Setup.exe
+dist/Daodian-0.3.0-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.3.2-Portable.exe
+dist/Daodian-0.3.0-Portable.exe
 ```
 
 Electron 或 NSIS 下载慢的话，可以先设镜像：

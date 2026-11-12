@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.3.2" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.3.0" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -64,8 +64,8 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 
 | Build | File | Notes |
 | --- | --- | --- |
-| Installer | [Daodian-0.3.2-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.2/Daodian-0.3.2-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
-| Portable | [Daodian-0.3.2-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.2/Daodian-0.3.2-Portable.exe) | Single file, no installation |
+| Installer | [Daodian-0.3.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
+| Portable | [Daodian-0.3.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Portable.exe) | Single file, no installation |
 
 [All releases](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -85,7 +85,7 @@ The three-step setup asks for:
 2. **Hours** — start, end, lunch start and lunch length. The default is 09:00–18:30 with a 90-minute lunch.
 3. **Skin** — day skin, night skin, and whether to follow time, the system theme, or a fixed skin.
 
-Work patterns include fixed Mon–Fri, alternating “big/small weeks” (大小周), and six-day weeks (单休). The widget lands in the bottom-right corner; drag it wherever you like.
+Use the **中文 / English** switch in the setup header if you want the English interface; Chinese is the default. Work patterns include fixed Mon–Fri, alternating “big/small weeks” (大小周), and six-day weeks (单休). The widget lands in the bottom-right corner; drag it wherever you like.
 
 ## How the money is calculated
 
@@ -100,6 +100,7 @@ effectiveHourly = earned ÷ ((workedSeconds + overtimeSeconds) ÷ 3600)
 - After off-work time, `effectiveHourly` falls as overtime grows. The thin strip under the rate is `effectiveHourly ÷ normalHourly`.
 - In **1.5× overtime mode**, pay keeps growing at `normalHourly × 1.5` instead of diluting.
 - On non-workdays the card switches to a quiet “rest day” state and shows the next workday.
+- With punch-based pay modes, the day starts at your clock-in and ends at your clock-out (or now while you are still working), with the configured late/early grace; days without a punch still follow the configured shift.
 
 ## Settings
 
@@ -161,10 +162,10 @@ npm run dist     # installer + portable build
 Outputs:
 
 ```text
-dist/Daodian-0.3.2-Setup.exe
-dist/Daodian-0.3.2-Setup.exe.blockmap
+dist/Daodian-0.3.0-Setup.exe
+dist/Daodian-0.3.0-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.3.2-Portable.exe
+dist/Daodian-0.3.0-Portable.exe
 ```
 
 If Electron or NSIS downloads are slow, set the mirrors first:

@@ -1,50 +1,33 @@
 # Changelog
 
-## 0.3.2 — 2026-11-12
-
-### Added
-
-- Clocking out now opens a confirmation window instead of saving immediately. It shows today's clock-in and clock-out times; both are editable, so a wrong time can be corrected before saving. Cancel leaves the day untouched.
-- After a confirmed clock-out, the card plays a confetti celebration (plus the existing chime when sound is enabled).
-- After the day is clocked out, the tray/widget menu has “修改今日打卡…” to reopen the same editor; correcting an existing punch does not replay the celebration.
-
-## 0.3.1 — 2026-11-12
-
-### Fixed
-
-- The punch control is now always on the card on a workday instead of only appearing around the shift times. It reads “打卡上班” until you clock in and “打卡下班” until you clock out; no right-click menu is needed. The footer still shows the distance/hourly text, and the button is larger.
-- Clicking the panel's “打卡下班” button reliably records the clock-out. The button state is recomputed from the saved config after every punch, including when the config broadcast arrives before the IPC response.
-- A punch-in after the scheduled end no longer invents overtime from the scheduled end; overtime starts at the actual punch-in.
-- The overtime strip is hidden when there is no base work, so an after-hours punch no longer shows a misleading ¥0.00 effective hourly.
-- The punch button label updates immediately after a language switch.
-- The top-right tools (eye, auto-tuck, gear) and the punch button were moved outside the draggable card body. The whole card is an `-webkit-app-region: drag` area and on Windows it could swallow clicks on its `no-drag` children (seen with the neon skin); the controls are now siblings of the card with a dedicated no-drag hover zone, so hover, click and drag all work reliably.
-
 ## 0.3.0 — 2026-11-12
 
 ### Added
 
-- **Clock in / clock out.** On a workday the panel footer carries a punch button: it reads “打卡上班” until you clock in, then “打卡下班” until you clock out. It stays available all day instead of only around the shift edges, so no menu is needed. The tray and widget menus also offer punch / undo. Only the current day is stored; a new day starts fresh.
+- **Clock in / clock out on the panel.** On a workday the card footer carries a punch button: it reads “打卡上班” until you clock in and “打卡下班” until you clock out. It stays available all day, not only around the shift edges, so no menu is needed. Clocking out opens a confirmation window with editable clock-in and clock-out times; confirming saves the day and plays a confetti celebration (plus the chime when sound is enabled). The tray and widget menus also offer punch, edit and undo. Only the current day is stored; a new day starts fresh.
 - **Three ways to pay a punched day.** Settings → “Clock & pay”:
   - **Scheduled shift (default):** punches are recorded and shown, but the money follows the configured hours.
   - **Actual punches:** pay starts at the clock-in time, stops at clock-out, late arrival and early leave reduce the amount, and staying late adds overtime.
   - **Custom:** choose whether late arrival and early leave affect pay, set a 0–30 minute grace period, and decide whether time after the shift counts as overtime.
 - **A separate Work statistics window.** Open “工作统计…” from the widget or tray menu. It has day / month / year views: a month calendar with earnings heat and mood emojis, a year wall of 12 mini calendars, and a day detail with a completion ring, punch times, overtime and a workday ribbon. Today updates live.
 - **Mood and notes per day.** In the day view, pick one of six moods (😄 🙂 😐 😫 😴 🔥) and write a short note. It is saved in `stats.json` and the emoji appears in the month calendar.
-- **English / Chinese interface.** The whole UI is translated: setup, widget, settings, statistics, tray menus, dialogs and notifications. Choose English or 中文 in the first-run setup or from the switch in the Settings header. Chinese remains the default; the legacy config defaults to it.
-- Settings → About & updates now has a **GitHub project home** row with an “Open GitHub” button.
+- **English / Chinese interface.** The whole UI is translated: setup, widget, settings, statistics, confirmation dialog, tray menus, dialogs and notifications. Choose English or 中文 in the first-run setup or from the switch in the Settings header. Chinese remains the default.
+- Settings → About & updates has a **GitHub project home** row with an “Open GitHub” button.
+
+### Fixed
+
+- The top-right tools (eye, auto-tuck, gear) and the punch button sit outside the draggable card body. The whole card is an `-webkit-app-region: drag` area, and on Windows it could swallow clicks on its `no-drag` children (seen with the neon skin); the controls are now siblings of the card with a dedicated no-drag hover zone.
+- Clicking the panel's “打卡下班” button reliably opens the confirmation and records the clock-out; the button state is recomputed from the saved config after every punch.
+- A punch-in after the scheduled end no longer invents overtime from the scheduled end; overtime starts at the actual punch-in. The overtime strip is hidden when there is no base work.
+- Correcting an existing punch from the menu does not replay the celebration.
+- The punch button label updates immediately after a language switch.
 
 ### Changed
 
 - The config gains `clockMode`, `clockLate`, `clockEarly`, `clockOvertime`, `clockGraceMin`, `punchDate`, `punchIn` and `punchOut`; older configs default to the scheduled-shift mode.
 - The daily work statistics are recorded about once a minute while the app is running and immediately when punching, so closing the app loses at most the last minute of the current day. Mood and notes survive those snapshots.
 - Statistics moved out of Settings into its own window.
-- README: added the clock-in, statistics and mood features, `stats.json`, and updated the “no attendance tracking” limitation.
-
-## 0.2.5 — 2026-11-12
-
-### Added
-
-- Settings → About & updates now includes a **GitHub project home** row showing `github.com/Pumatlarge/daodian`, with an “Open GitHub” button that opens the repository in the default browser (source, changelog and issue tracker).
+- README: added the clock-in, statistics, moods and language features, `stats.json`, and updated the “no attendance tracking” limitation.
 
 ## 0.2.4 — 2026-11-12
 
