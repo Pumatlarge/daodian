@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('api', {
   clearPunch: () => ipcRenderer.invoke('punch:clear'),
   recordStats: (entry) => ipcRenderer.invoke('stats:record', entry),
   getStats: () => ipcRenderer.invoke('stats:get'),
+  setStatsMood: (payload) => ipcRenderer.invoke('stats:mood', payload),
   openSettings: () => ipcRenderer.invoke('settings:open'),
   finishSetup: (patch) => ipcRenderer.invoke('setup:finish', patch),
   closeSelf: () => ipcRenderer.send('window:close'),

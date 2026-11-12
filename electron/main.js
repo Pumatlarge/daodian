@@ -46,6 +46,7 @@ let cfg = null;
 let win = null;
 let setupWin = null;
 let settingsWin = null;
+let statsWin = null;
 let tray = null;
 let quitting = false;
 let lastSummary = '';
@@ -442,6 +443,7 @@ function buildMenu(kind) {
       click: () => toggleWidget()
     },
     { label: '打开设置…', click: () => openSettings() },
+    { label: '工作统计…', click: () => openStats() },
     ...(function punchMenuItems() {
       if (!cfg) return [];
       const now = new Date();
@@ -1031,6 +1033,46 @@ function openSettings() {
   });
 }
 
+function openStats() {
+  if (!cfg.onboarded) {
+    showSetup();
+    return;
+  }
+  if (statsWin && !statsWin.isDestroyed()) {
+    if (statsWin.isMinimized()) statsWin.restore();
+    statsWin.show();
+    statsWin.focus();
+    return;
+  }
+  const workArea = screen.getPrimaryDisplay().workAreaSize;
+  statsWin = new BrowserWindow({
+    width: Math.min(1020, Math.max(760, workArea.width - 100)),
+    height: Math.min(860, Math.max(620, workArea.height - 60)),
+    minWidth: 760,
+    minHeight: 580,
+    title: '到点 · 工作统计',
+    icon: asset('icon.png'),
+    backgroundColor: '#f2ebdf',
+    autoHideMenuBar: true,
+    show: false,
+    webPreferences: {
+      preload: preload(),
+      contextIsolation: true,
+      nodeIntegration: false,
+      spellcheck: false
+    }
+  });
+  statsWin.setMenu(null);
+  statsWin.loadFile(path.join(__dirname, '..', 'src', 'stats.html'));
+  statsWin.once('ready-to-show', () => {
+    statsWin.show();
+    statsWin.focus();
+  });
+  statsWin.on('closed', () => {
+    statsWin = null;
+  });
+}
+
 function showSetup() {
   if (setupWin && !setupWin.isDestroyed()) {
     setupWin.show();
@@ -1133,6 +1175,7 @@ function registerIpc() {
   ipcMain.handle('punch:clear', () => clearPunch());
   ipcMain.handle('stats:record', (event, entry) => stats.record(entry));
   ipcMain.handle('stats:get', () => stats.list());
+  ipcMain.handle('stats:mood', (event, payload) => stats.setMood(payload || {}));
 
   ipcMain.handle('settings:open', () => {
     openSettings();

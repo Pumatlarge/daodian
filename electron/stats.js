@@ -9,6 +9,7 @@ const { app } = require('electron');
 // when something actually changed.
 const MAX_DAYS = 900;
 const SAVE_DELAY = 900;
+const MOODS = ['happy', 'calm', 'meh', 'tired', 'sleepy', 'fired'];
 
 let filePath = null;
 let days = {};
@@ -59,12 +60,36 @@ function record(entry) {
   if (!entry || typeof entry.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) {
     return false;
   }
-  const next = sanitize(entry);
-  const prev = days[next.date];
+  const prev = days[entry.date];
+  const next = prev ? { ...prev, ...sanitize(entry) } : sanitize(entry);
   if (prev && JSON.stringify(prev) === JSON.stringify(next)) return false;
   days[next.date] = next;
   scheduleSave();
   return true;
+}
+
+function setMood(payload) {
+  const date = payload && payload.date;
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return list();
+  const prev = days[date];
+  const mood = MOODS.includes(payload.mood) ? payload.mood : null;
+  const note =
+    typeof payload.note === 'string' ? payload.note.slice(0, 160) : (prev && prev.note) || '';
+  if (!prev && !mood && !note) return list();
+  if (prev && (prev.mood || null) === mood && (prev.note || '') === note) return list();
+  const base = prev || {
+    date,
+    workday: false,
+    earned: 0,
+    target: 0,
+    workedSec: 0,
+    overtimeSec: 0,
+    punchIn: null,
+    punchOut: null
+  };
+  days[date] = { ...base, date, mood, note };
+  scheduleSave();
+  return list();
 }
 
 function scheduleSave() {
@@ -99,6 +124,7 @@ function list() {
 module.exports = {
   init,
   record,
+  setMood,
   flush,
   list
 };

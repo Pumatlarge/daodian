@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>到点 · 工作统计</title>
+    <link rel="stylesheet" href="stats.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="masthead">
+        <div class="mast-left">
+          <div class="eyebrow"><span class="dot"></span>DAODIAN · 工作统计</div>
+          <h1>把每一天，存进日历。</h1>
+          <p class="sub">记录收获，也记下当天的心情。</p>
+        </div>
+        <div class="mast-right">
+          <div class="segmented" id="viewTabs">
+            <button type="button" data-view="day">日</button>
+            <button type="button" data-view="month" class="on">月</button>
+            <button type="button" data-view="year">年</button>
+          </div>
+          <button class="close" id="btnClose" type="button">关闭</button>
+        </div>
+      </header>
+
+      <div class="period">
+        <button class="nav" id="prev" type="button" aria-label="上一段">‹</button>
+        <div class="period-main">
+          <b id="periodTitle">—</b>
+          <span id="periodSub">—</span>
+        </div>
+        <button class="nav" id="next" type="button" aria-label="下一段">›</button>
+        <button class="today" id="todayBtn" type="button">回到今天</button>
+      </div>
+
+      <main id="content"></main>
+
+      <footer class="foot">
+        <span>数据保存在本机 stats.json · 今天实时更新</span>
+        <button class="link" id="btnSettings" type="button">打开设置</button>
+      </footer>
+    </div>
+    <div class="toast" id="toast">已保存</div>
+    <script src="../shared/calc.js"></script>
+    <script src="stats.js"></script>
+  </body>
+</html>

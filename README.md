@@ -53,7 +53,7 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 - **A proper desktop citizen.** Frameless and transparent, always on top, draggable, snap-to-edge, remembers its position, lives in the tray, can start with Windows. `Ctrl + Shift + H` hides or shows it instantly.
 - **Edge auto-tuck.** Optional: after a configurable delay the card slides into the nearest left/right screen edge, leaving a small glowing handle. Hover the handle and it slides back. Delay is adjustable from 1 to 10 seconds.
 - **Clock in / clock out.** Around your start and end times the card offers a punch button. Settings lets you choose what a punch means: keep the configured shift (default; punches are only recorded), use the actual punch times, or a custom mix with a late/early grace period and optional overtime.
-- **Work statistics.** Settings → Work statistics shows day, month and year totals: earned, paid hours, overtime, recorded days and target completion, with a daily or monthly chart. Today updates live; history lives in `stats.json` on this machine.
+- **Work statistics, in its own window.** Open “工作统计…” from the widget or tray menu. The month view is a calendar with earnings heat, overtime marks and mood emojis; the year view is a wall of 12 mini calendars; the day view has a completion ring, punch times, a workday ribbon and the mood picker. Today updates live; history lives in `stats.json` on this machine.
 - **Updates in place.** Installed builds check GitHub Releases on launch and every six hours and download in the background. When the download finishes the app asks whether to install; nothing installs on quit without confirmation, and the installer window stays visible while it runs. A tray item and the settings page show progress; the check can be disabled. Portable builds can check and open the latest release page.
 - **A tiny bit of ceremony.** When the bar fills: confetti, a three-note chime and a Windows notification (each can be disabled).
 - **Local only.** No accounts, no telemetry. The only network call is the optional update check against GitHub Releases; everything else lives in a JSON file on your machine.
@@ -112,7 +112,7 @@ Everything is editable after onboarding:
 - Per-skin accent, background image, radius, font; global font size and opacity.
 - Display toggles: target, percentage, remaining time, hourly rate, overtime strip, privacy.
 - Always-on-top, autostart, notifications, chime, edge auto-tuck and its delay.
-- Clock-in calculation mode (schedule / actual punch / custom with grace) and work statistics by day, month and year.
+- Clock-in calculation mode (schedule / actual punch / custom with grace).
 - Auto-update toggle, current version, check-now and install-update controls, plus a GitHub project link.
 
 ## Controls
@@ -120,12 +120,13 @@ Everything is editable after onboarding:
 | Action | What it does |
 | --- | --- |
 | Drag the card | Move it; it snaps to screen edges and remembers the position |
-| Right-click | Skins, opacity, edge auto-tuck, privacy, always-on-top, autostart, quit |
+| Right-click | Skins, opacity, edge auto-tuck, privacy, always-on-top, autostart, statistics, quit |
 | Hover the top-right corner | Eye (privacy), pin (auto-tuck), gear (settings) |
 | `Ctrl + Shift + H` | Hide / show the widget |
-| Tray icon | Left-click toggles; right-click opens the full menu, including update status |
+| Tray icon | Left-click toggles; right-click opens the full menu, including statistics and update status |
 | Edge handle | Appears while tucked; hover to bring the card back |
 | Punch button | Appears around start / end times; records a punch and, if enabled, changes how the day is paid |
+| Work statistics… | Opens its own window: month calendar, year wall, day detail; click a day to add a mood and a note |
 
 ## Privacy
 
@@ -135,7 +136,7 @@ Daodian stores only what it needs to draw the widget:
 %APPDATA%\到点\config.json       settings, schedule, last position
 %APPDATA%\到点\config.json.bak   previous successful save
 %APPDATA%\到点\assets\           copies of custom background images
-%APPDATA%\到点\stats.json        daily work statistics by date
+%APPDATA%\到点\stats.json        daily work statistics, moods and notes
 ```
 
 No analytics and no account. The only network request is the update check against GitHub Releases (on launch and every six hours when auto-update is enabled); it can be disabled in Settings. The config is plain JSON — privacy mode hides the display, not the file. If you edit the file by hand, the app falls back to the `.bak` copy when the main file cannot be parsed.
