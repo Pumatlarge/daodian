@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 — 2026-11-12
+
+### Fixed
+
+- Dragging the widget to the right edge of a screen that faces another monitor no longer flips it to the opposite / left edge. The 0.2.1 “move to the outer edge” fallback was confusing and is removed; when the nearest edge is an internal boundary, auto-tuck simply stays expanded so the widget cannot hide under the neighbouring display.
+- The compact 64 px handle and the strip-only hover target from 0.2.1 remain.
+
 ## 0.2.1 — 2026-11-12
 
 ### Fixed

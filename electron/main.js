@@ -698,17 +698,12 @@ function tuckCollapse(force) {
   }
 
   const center = b.x + b.width / 2;
-  let side = center < wa.x + wa.width / 2 ? 'left' : 'right';
-  let movedToOuter = false;
+  const side = center < wa.x + wa.width / 2 ? 'left' : 'right';
 
+  // Never tuck into the gap between two monitors: the window would overlap
+  // the neighbouring display and could not be pulled out. Stay expanded.
   if (hasNeighborDisplay(wa, side, b)) {
-    const opposite = side === 'left' ? 'right' : 'left';
-    if (hasNeighborDisplay(wa, opposite, b)) {
-      logTuckError('no-outer-edge', { side, b, wa });
-      return;
-    }
-    side = opposite;
-    movedToOuter = true;
+    return;
   }
 
   const y = clamp(b.y, wa.y, wa.y + wa.height - b.height);
@@ -722,13 +717,7 @@ function tuckCollapse(force) {
     return;
   }
 
-  const expandedY = clamp(b.y, wa.y, wa.y + wa.height - b.height);
-  tuck.expanded = movedToOuter
-    ? {
-        x: side === 'left' ? wa.x : wa.x + wa.width - b.width,
-        y: expandedY
-      }
-    : { x: b.x, y: b.y };
+  tuck.expanded = { x: b.x, y: b.y };
   tuck.side = side;
   tuck.collapsed = true;
   sendTuckState();
