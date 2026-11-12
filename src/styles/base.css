@@ -341,6 +341,22 @@ body {
   content: "›";
 }
 
+/* While tucked the window is only 32 px wide (the Windows minimum for a
+   frameless window). Anchor the 16 px handle to the half that touches the
+   screen edge, so the visible handle stays flush with the edge and the rest
+   of the window remains transparent. */
+@media (max-width: 120px) {
+  #app[data-tuck="right"] .tuck-tab {
+    left: auto;
+    right: 0;
+  }
+
+  #app[data-tuck="left"] .tuck-tab {
+    right: auto;
+    left: 0;
+  }
+}
+
 .tuck-tab::before {
   content: "";
   position: absolute;

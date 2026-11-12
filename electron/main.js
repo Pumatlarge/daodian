@@ -34,7 +34,7 @@ const EDGE_MARGIN = 24;
 const SNAP_DISTANCE = 20;
 const TUCK_VISIBLE = 16;
 const TUCK_TAB_HEIGHT = 64;
-const TUCK_HIT_PADDING = 6;
+const TUCK_MIN_WIDTH = 32;
 const TUCK_DURATION = 200;
 const UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
 const RELEASES_URL = 'https://github.com/Pumatlarge/daodian/releases/latest';
@@ -77,30 +77,6 @@ const tuck = {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
-}
-
-function overlapsVertically(a, b) {
-  return a.y < b.y + b.height && a.y + a.height > b.y;
-}
-
-function hasNeighborDisplay(wa, side, windowBounds) {
-  const tolerance = 24;
-  return screen.getAllDisplays().some((display) => {
-    const workArea = display.workArea;
-    if (
-      workArea.x === wa.x &&
-      workArea.y === wa.y &&
-      workArea.width === wa.width &&
-      workArea.height === wa.height
-    ) {
-      return false;
-    }
-    if (!overlapsVertically(workArea, windowBounds)) return false;
-    if (side === 'right') {
-      return Math.abs(workArea.x - (wa.x + wa.width)) <= tolerance;
-    }
-    return Math.abs(workArea.x + workArea.width - wa.x) <= tolerance;
-  });
 }
 
 function logTuckError(kind, data) {
@@ -591,10 +567,7 @@ function showWidget(focus) {
     return;
   }
   if (tuck.collapsed) {
-    tuck.collapsed = false;
-    tuck.lastInside = Date.now();
-    if (tuck.expanded) safeSetPosition(tuck.expanded.x, tuck.expanded.y, 'show-widget');
-    sendTuckState();
+    tuckExpand();
   }
   win.show();
   tuck.lastInside = Date.now();
@@ -682,6 +655,19 @@ function animateWindow(target, done) {
   }, 16);
 }
 
+function dockedTabBounds(side, wa, expandedY) {
+  const y = clamp(
+    Math.round(expandedY + (WIDGET_HEIGHT - TUCK_TAB_HEIGHT) / 2),
+    wa.y,
+    wa.y + wa.height - TUCK_TAB_HEIGHT
+  );
+  // Windows refuses to make a frameless window narrower than 32 px, so the
+  // collapsed window is 32 px wide and the renderer draws the 16 px handle on
+  // the screen-edge half of it. Nothing spills onto a neighbouring display.
+  const x = side === 'right' ? wa.x + wa.width - TUCK_MIN_WIDTH : wa.x;
+  return { x, y, width: TUCK_MIN_WIDTH, height: TUCK_TAB_HEIGHT };
+}
+
 function tuckCollapse(force) {
   if (!cfg || !cfg.autoTuck || !win || win.isDestroyed() || !win.isVisible()) return;
   if (tuck.collapsed || tuck.moving) return;
@@ -699,111 +685,110 @@ function tuckCollapse(force) {
 
   const center = b.x + b.width / 2;
   const side = center < wa.x + wa.width / 2 ? 'left' : 'right';
+  const expandedX = side === 'right' ? wa.x + wa.width - WIDGET_WIDTH : wa.x;
+  const expandedY = clamp(b.y, wa.y, wa.y + wa.height - WIDGET_HEIGHT);
 
-  // Never tuck into the gap between two monitors: the window would overlap
-  // the neighbouring display and could not be pulled out. Stay expanded.
-  if (hasNeighborDisplay(wa, side, b)) {
+  // The full window slides until only the 16 px handle remains on screen,
+  // then it is physically shrunk to the handle so nothing overlaps another
+  // display and the cursor can never sit on an invisible part of the window.
+  const slide = {
+    x: side === 'right' ? wa.x + wa.width - TUCK_VISIBLE : wa.x - WIDGET_WIDTH + TUCK_VISIBLE,
+    y: expandedY
+  };
+
+  if (!Number.isFinite(slide.x) || !Number.isFinite(slide.y)) {
+    logTuckError('invalid-collapse-target', { slide, b, wa });
     return;
   }
 
-  const y = clamp(b.y, wa.y, wa.y + wa.height - b.height);
-  const x =
-    side === 'right'
-      ? wa.x + wa.width - TUCK_VISIBLE
-      : wa.x - b.width + TUCK_VISIBLE;
-
-  if (!Number.isFinite(x) || !Number.isFinite(y)) {
-    logTuckError('invalid-collapse-target', { x, y, b, wa });
-    return;
-  }
-
-  tuck.expanded = { x: b.x, y: b.y };
+  tuck.expanded = { x: expandedX, y: expandedY };
   tuck.side = side;
   tuck.collapsed = true;
   sendTuckState();
   refreshMenus();
-  animateWindow({ x, y }, (ok) => {
-    if (ok) return;
-    tuck.collapsed = false;
-    sendTuckState();
-    refreshMenus();
-    if (tuck.expanded) {
-      safeSetPosition(tuck.expanded.x, tuck.expanded.y, 'collapse-fallback');
+  animateWindow(slide, (ok) => {
+    if (!ok) {
+      tuck.collapsed = false;
+      sendTuckState();
+      refreshMenus();
+      if (tuck.expanded) {
+        safeSetPosition(tuck.expanded.x, tuck.expanded.y, 'collapse-fallback');
+      }
+      return;
+    }
+    if (!win || win.isDestroyed()) return;
+    const dock = dockedTabBounds(side, wa, expandedY);
+    suppressBoundsUntil = Date.now() + 320;
+    try {
+      win.setBounds(dock, false);
+    } catch (error) {
+      logTuckError('dock-failed', { error: String(error), dock });
     }
   });
 }
 
 function tuckExpand() {
   if (!win || win.isDestroyed() || !tuck.collapsed) return;
-  const fallback = defaultPosition();
-  let base = fallback;
-  if (
-    tuck.expanded &&
-    Number.isFinite(Number(tuck.expanded.x)) &&
-    Number.isFinite(Number(tuck.expanded.y))
-  ) {
-    base = tuck.expanded;
-  } else if (tuck.expanded) {
-    logTuckError('invalid-expanded-bounds', { expanded: tuck.expanded });
-  }
 
+  let b;
   let wa;
   try {
-    wa = screen.getDisplayMatching({
-      x: Number(base.x),
-      y: Number(base.y),
-      width: WIDGET_WIDTH,
-      height: WIDGET_HEIGHT
-    }).workArea;
+    b = win.getBounds();
+    wa = screen.getDisplayMatching(b).workArea;
   } catch (error) {
     logTuckError('expand-bounds-failed', { error: String(error) });
     return;
   }
 
+  const side = b.x + b.width / 2 < wa.x + wa.width / 2 ? 'left' : 'right';
+  const tabCenterY = b.y + b.height / 2;
   const target = {
-    x: clamp(Number(base.x), wa.x, wa.x + wa.width - WIDGET_WIDTH),
-    y: clamp(Number(base.y), wa.y, wa.y + wa.height - WIDGET_HEIGHT)
+    x: side === 'right' ? wa.x + wa.width - WIDGET_WIDTH : wa.x,
+    y: clamp(
+      Math.round(tabCenterY - WIDGET_HEIGHT / 2),
+      wa.y,
+      wa.y + wa.height - WIDGET_HEIGHT
+    )
   };
   if (!Number.isFinite(target.x) || !Number.isFinite(target.y)) {
-    logTuckError('invalid-expand-target', { target, base, wa });
+    logTuckError('invalid-expand-target', { target, b, wa });
     return;
   }
 
+  suppressBoundsUntil = Date.now() + 320;
   tuck.collapsed = false;
+  tuck.side = side;
   tuck.lastInside = Date.now();
+  tuck.expanded = { x: target.x, y: target.y };
   sendTuckState();
   refreshMenus();
-  animateWindow(target, (ok) => {
-    if (ok) return;
+  try {
+    win.setBounds(
+      { x: target.x, y: target.y, width: WIDGET_WIDTH, height: WIDGET_HEIGHT },
+      false
+    );
+  } catch (error) {
+    logTuckError('expand-failed', { error: String(error), target });
     tuck.collapsed = true;
     sendTuckState();
     refreshMenus();
-  });
+    return;
+  }
+  if (cfg) cfg = store.save({ bounds: { x: target.x, y: target.y } });
 }
 
 function tuckTick() {
   if (!cfg || !cfg.autoTuck) return;
   if (!win || win.isDestroyed() || !win.isVisible()) return;
-  if (tuckPaused || tuck.moving || !win.isVisible()) return;
+  if (tuckPaused || tuck.moving) return;
 
   const point = screen.getCursorScreenPoint();
   const b = win.getBounds();
-  let inside;
-  if (tuck.collapsed) {
-    const stripLeft = tuck.side === 'right' ? b.x : b.x + b.width - TUCK_VISIBLE;
-    const tabTop = b.y + (b.height - TUCK_TAB_HEIGHT) / 2;
-    inside =
-      point.x >= stripLeft &&
-      point.x < stripLeft + TUCK_VISIBLE &&
-      point.y >= tabTop - TUCK_HIT_PADDING &&
-      point.y < tabTop + TUCK_TAB_HEIGHT + TUCK_HIT_PADDING;
-  } else {
-    inside =
-      point.x >= b.x &&
-      point.x < b.x + b.width &&
-      point.y >= b.y &&
-      point.y < b.y + b.height;
-  }
+  const inside =
+    point.x >= b.x &&
+    point.x < b.x + b.width &&
+    point.y >= b.y &&
+    point.y < b.y + b.height;
 
   if (inside) {
     tuck.lastInside = Date.now();

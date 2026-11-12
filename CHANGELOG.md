@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.3 — 2026-11-12
+
+### Fixed
+
+- Hovering the handle on the left edge no longer makes the card flash open and closed. The collapsed window is now physically docked as a small 32 × 64 px window at the screen edge instead of a full 360 × 190 px window slid mostly off-screen, so the cursor can never sit on an invisible part of the widget.
+- Expanding now always docks the card flush against the edge it was tucked into and keeps the handle under the cursor, which removes the expand/collapse loop entirely.
+- The right edge tucks again, including the inner boundary between two monitors. 0.2.2 skipped every edge that faced another display; that skip is gone because the collapsed window no longer spills onto the neighbouring display.
+- The visible handle stays a compact 16 × 64 px tab that hugs the screen edge, while the extra 16 px required by the Windows minimum window width stays transparent and on-screen.
+
 ## 0.2.2 — 2026-11-12
 
 ### Fixed
