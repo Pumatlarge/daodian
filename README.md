@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.1.1" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.2.0" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -52,19 +52,22 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 - **Privacy mode.** One click turns every amount into `¥•••` while keeping the progress bar. Useful in an open office, on a screen share, or on a train.
 - **A proper desktop citizen.** Frameless and transparent, always on top, draggable, snap-to-edge, remembers its position, lives in the tray, can start with Windows. `Ctrl + Shift + H` hides or shows it instantly.
 - **Edge auto-tuck.** Optional: after a configurable delay the card slides into the nearest left/right screen edge, leaving a small glowing handle. Hover the handle and it slides back. Delay is adjustable from 1 to 10 seconds.
+- **Updates in place.** Installed builds check GitHub Releases on launch and every six hours, download in the background, and install on quit. A tray item and the settings page show progress; the check can be disabled. Portable builds can check and open the latest release page.
 - **A tiny bit of ceremony.** When the bar fills: confetti, a three-note chime and a Windows notification (each can be disabled).
-- **Local only.** No accounts, no telemetry, no network calls. Everything lives in a JSON file on your machine.
+- **Local only.** No accounts, no telemetry. The only network call is the optional update check against GitHub Releases; everything else lives in a JSON file on your machine.
 
 ## Download
 
 | Build | File | Notes |
 | --- | --- | --- |
-| Installer | [Daodian-0.1.1-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.1/Daodian-0.1.1-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
-| Portable | [Daodian-0.1.1-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.1/Daodian-0.1.1-Portable.exe) | Single file, no installation |
+| Installer | [Daodian-0.2.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.0/Daodian-0.2.0-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
+| Portable | [Daodian-0.2.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.0/Daodian-0.2.0-Portable.exe) | Single file, no installation |
 
 [All releases](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
 > The executables are unsigned. On first launch Windows SmartScreen may show a warning — choose **More info → Run anyway**. The installer keeps your local settings when you uninstall.
+>
+> Installed builds from 0.2.0 onward update themselves from GitHub Releases. The portable build never self-updates; use its “check for updates” action to open the release page.
 
 ## First run
 
@@ -107,6 +110,7 @@ Everything is editable after onboarding:
 - Per-skin accent, background image, radius, font; global font size and opacity.
 - Display toggles: target, percentage, remaining time, hourly rate, overtime strip, privacy.
 - Always-on-top, autostart, notifications, chime, edge auto-tuck and its delay.
+- Auto-update toggle, current version, check-now and restart-to-install controls.
 
 ## Controls
 
@@ -116,7 +120,7 @@ Everything is editable after onboarding:
 | Right-click | Skins, opacity, edge auto-tuck, privacy, always-on-top, autostart, quit |
 | Hover the top-right corner | Eye (privacy), pin (auto-tuck), gear (settings) |
 | `Ctrl + Shift + H` | Hide / show the widget |
-| Tray icon | Left-click toggles; right-click opens the full menu |
+| Tray icon | Left-click toggles; right-click opens the full menu, including update status |
 | Edge handle | Appears while tucked; hover to bring the card back |
 
 ## Privacy
@@ -129,7 +133,7 @@ Daodian stores only what it needs to draw the widget:
 %APPDATA%\到点\assets\           copies of custom background images
 ```
 
-No network requests, no analytics, no account. The config is plain JSON — privacy mode hides the display, not the file. If you edit the file by hand, the app falls back to the `.bak` copy when the main file cannot be parsed.
+No analytics and no account. The only network request is the update check against GitHub Releases (on launch and every six hours when auto-update is enabled); it can be disabled in Settings. The config is plain JSON — privacy mode hides the display, not the file. If you edit the file by hand, the app falls back to the `.bak` copy when the main file cannot be parsed.
 
 ## Build from source
 
@@ -147,8 +151,10 @@ npm run dist     # installer + portable build
 Outputs:
 
 ```text
-dist/Daodian-0.1.1-Setup.exe
-dist/Daodian-0.1.1-Portable.exe
+dist/Daodian-0.2.0-Setup.exe
+dist/Daodian-0.2.0-Setup.exe.blockmap
+dist/latest.yml
+dist/Daodian-0.2.0-Portable.exe
 ```
 
 If Electron or NSIS downloads are slow, set the mirrors first:
@@ -173,12 +179,28 @@ tests/           calculation tests
 
 The UI is in Simplified Chinese. The calculation layer is framework-free and covered by `tests/calc.test.js`; an English UI is a welcome contribution.
 
+## Releasing
+
+The installed build updates in place from GitHub Releases. After bumping the version, `npm run dist` generates the update manifest and blockmap. Publish **all four** files for every release after 0.2.0:
+
+```text
+Daodian-<version>-Setup.exe
+Daodian-<version>-Setup.exe.blockmap
+latest.yml
+Daodian-<version>-Portable.exe   (optional for updates, useful for portable users)
+```
+
+Create the GitHub release with tag `v<version>`, upload the files, and mark it as the latest release. The updater reads `latest.yml` and downloads the Setup from that release. Do not rename `latest.yml`, and keep the blockmap next to the Setup with the matching filename; the updater uses it for differential downloads.
+
+The first updater-enabled build, **0.2.0**, has to be installed manually once. From then on, installed users receive subsequent versions through the in-app updater; portable users always download manually.
+
 ## Known limitations
 
+- **Auto-updates start with 0.2.0.** Users on 0.1.x need a one-time manual install of 0.2.0; later versions update in place.
 - **Public holidays are not built in.** Days are classified by the work pattern only; 调休/holiday calendars are on the roadmap.
 - **No clock-in tracking.** The widget follows the schedule you configure; arriving late or leaving early does not automatically reduce the displayed pay.
 - **Windows only.** The transparent-window and tray behavior is tuned for Windows 10/11.
-- **Unsigned builds.** No code-signing certificate is configured.
+- **Unsigned builds and updates.** No code-signing certificate is configured; Windows SmartScreen may warn. A signing certificate is recommended for wider distribution.
 - **Big/small week anchor.** The alternation is anchored to the week you mark as a “big week”; change jobs or shifts and re-check it.
 
 ## Roadmap
@@ -191,7 +213,7 @@ The UI is in Simplified Chinese. The calculation layer is framework-free and cov
 
 ## Contributing
 
-Issues and pull requests are welcome. Please keep `npm test` green, keep the calculation logic in `shared/calc.js` free of DOM/Electron dependencies, and avoid adding telemetry or network calls.
+Issues and pull requests are welcome. Please keep `npm test` green, keep the calculation logic in `shared/calc.js` free of DOM/Electron dependencies, and avoid adding telemetry or unrelated network calls.
 
 ## License
 

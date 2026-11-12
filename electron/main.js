@@ -19,6 +19,7 @@ const fs = require('fs');
 const store = require('./store');
 const { effectiveTheme } = require('./theme');
 const THEMES = require('../shared/themes');
+const { autoUpdater } = require('electron-updater');
 
 app.setName('到点');
 if (process.env.DAODIAN_USER_DATA) {
@@ -33,6 +34,8 @@ const EDGE_MARGIN = 24;
 const SNAP_DISTANCE = 20;
 const TUCK_VISIBLE = 16;
 const TUCK_DURATION = 200;
+const UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
+const RELEASES_URL = 'https://github.com/Pumatlarge/daodian/releases/latest';
 
 let cfg = null;
 let win = null;
@@ -49,6 +52,19 @@ let tuckAnim = null;
 let tuckPaused = false;
 let suppressBoundsUntil = 0;
 let lastMenuShown = 0;
+let updateTimer = null;
+let pendingVersion = null;
+let updateNotifiedVersion = null;
+let lastProgressAt = 0;
+const isPortable = !!(
+  process.env.PORTABLE_EXECUTABLE_FILE || process.env.PORTABLE_EXECUTABLE_DIR
+);
+const updateState = {
+  status: app.isPackaged ? (isPortable ? 'portable' : 'idle') : 'dev',
+  version: null,
+  percent: 0,
+  error: null
+};
 const tuck = {
   collapsed: false,
   side: 'right',
@@ -156,6 +172,164 @@ function refreshMenus() {
   if (tray) tray.setContextMenu(buildMenu('tray'));
 }
 
+function updateInfo() {
+  return {
+    status: updateState.status,
+    version: updateState.version,
+    percent: updateState.percent,
+    error: updateState.error,
+    portable: isPortable,
+    currentVersion: app.getVersion(),
+    autoUpdate: !!(cfg && cfg.autoUpdate)
+  };
+}
+
+function broadcastUpdate(patch) {
+  const previousStatus = updateState.status;
+  updateState.status = patch.status || updateState.status;
+  if (Object.prototype.hasOwnProperty.call(patch, 'version')) updateState.version = patch.version;
+  if (Object.prototype.hasOwnProperty.call(patch, 'percent')) updateState.percent = patch.percent;
+  if (Object.prototype.hasOwnProperty.call(patch, 'error')) updateState.error = patch.error;
+  const info = updateInfo();
+  for (const w of allWindows()) {
+    try {
+      w.webContents.send('update:status', info);
+    } catch (error) {
+      /* ignore */
+    }
+  }
+  if (previousStatus !== updateState.status || updateState.status === 'downloaded') {
+    refreshMenus();
+  }
+}
+
+function setupUpdater() {
+  if (!app.isPackaged) {
+    updateState.status = 'dev';
+    return;
+  }
+  if (isPortable) {
+    updateState.status = 'portable';
+    return;
+  }
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoRunAppAfterInstall = true;
+  autoUpdater.allowPrerelease = false;
+  autoUpdater.allowDowngrade = false;
+
+  autoUpdater.on('checking-for-update', () => {
+    broadcastUpdate({ status: 'checking', error: null });
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    broadcastUpdate({
+      status: 'available',
+      version: info.version,
+      percent: 0,
+      error: null
+    });
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    broadcastUpdate({
+      status: 'current',
+      version: app.getVersion(),
+      percent: 0,
+      error: null
+    });
+  });
+
+  autoUpdater.on('download-progress', (progress) => {
+    const now = Date.now();
+    if (now - lastProgressAt < 500) return;
+    lastProgressAt = now;
+    broadcastUpdate({
+      status: 'downloading',
+      percent: Math.round(progress.percent || 0)
+    });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    pendingVersion = info.version;
+    broadcastUpdate({
+      status: 'downloaded',
+      version: info.version,
+      percent: 100,
+      error: null
+    });
+    if (cfg.notify && Notification.isSupported() && updateNotifiedVersion !== info.version) {
+      updateNotifiedVersion = info.version;
+      try {
+        new Notification({
+          title: '到点 · 新版本已就绪',
+          body: 'v' + info.version + ' 已下载，退出到点时会自动安装。',
+          icon: asset('icon.png'),
+          silent: true
+        }).show();
+      } catch (error) {
+        /* notifications are optional */
+      }
+    }
+  });
+
+  autoUpdater.on('error', (error) => {
+    broadcastUpdate({
+      status: 'error',
+      error: String(error && error.message ? error.message : error)
+    });
+  });
+
+  updateTimer = setInterval(() => {
+    if (cfg && cfg.autoUpdate) checkForUpdates(false);
+  }, UPDATE_INTERVAL);
+
+  if (cfg.autoUpdate) {
+    setTimeout(() => {
+      checkForUpdates(false);
+    }, 10000);
+  }
+}
+
+function checkForUpdates(manual) {
+  if (!app.isPackaged) {
+    broadcastUpdate({ status: 'dev', error: null });
+    return updateInfo();
+  }
+  if (isPortable) {
+    broadcastUpdate({ status: 'portable', error: null });
+    if (manual) shell.openExternal(RELEASES_URL);
+    return updateInfo();
+  }
+  if (updateState.status === 'downloaded') return updateInfo();
+  if (updateState.status === 'checking' || updateState.status === 'downloading') {
+    return updateInfo();
+  }
+
+  broadcastUpdate({ status: 'checking', error: null });
+  autoUpdater.checkForUpdates().catch((error) => {
+    broadcastUpdate({
+      status: 'error',
+      error: String(error && error.message ? error.message : error)
+    });
+  });
+  return updateInfo();
+}
+
+function installUpdate() {
+  if (!pendingVersion) return false;
+  quitting = true;
+  setImmediate(() => {
+    try {
+      autoUpdater.quitAndInstall(false, true);
+    } catch (error) {
+      logTuckError('update-install-failed', { error: String(error) });
+    }
+  });
+  return true;
+}
+
 function opacitySubmenu() {
   const values = [100, 95, 90, 85, 80, 70, 60, 50];
   const current = Math.round((cfg.opacity || 1) * 100);
@@ -214,6 +388,27 @@ function buildMenu(kind) {
       checked: !!cfg.privacy,
       click: () => saveConfig({ privacy: !cfg.privacy })
     },
+    { type: 'separator' },
+    {
+      label: isPortable ? '下载新版本…' : '检查更新…',
+      click: () => checkForUpdates(true)
+    },
+    ...(pendingVersion
+      ? [
+          {
+            label: '重启并安装 v' + pendingVersion,
+            click: () => installUpdate()
+          }
+        ]
+      : []),
+    ...(updateState.status === 'downloading'
+      ? [
+          {
+            label: '正在下载更新 ' + updateState.percent + '%',
+            enabled: false
+          }
+        ]
+      : []),
     { type: 'separator' },
     {
       label: '窗口置顶',
@@ -634,6 +829,12 @@ function saveConfig(patch, exceptWebContents) {
     }
     sendTuckState();
   }
+  if (patch && Object.prototype.hasOwnProperty.call(patch, 'autoUpdate')) {
+    broadcastUpdate({ status: updateState.status });
+    if (cfg.autoUpdate) {
+      setTimeout(() => checkForUpdates(false), 1200);
+    }
+  }
   broadcastConfig(exceptWebContents);
   broadcastTheme();
   refreshMenus();
@@ -793,6 +994,10 @@ function registerIpc() {
   ipcMain.handle('theme:get', () => currentTheme());
   ipcMain.handle('theme:apply', (event, id) => applyTheme(id));
   ipcMain.handle('theme:auto', () => restoreAutoTheme());
+
+  ipcMain.handle('update:get', () => updateInfo());
+  ipcMain.handle('update:check', () => checkForUpdates(true));
+  ipcMain.handle('update:install', () => installUpdate());
   ipcMain.handle('tuck:get', () => ({
     collapsed: !!tuck.collapsed,
     side: tuck.side
@@ -918,6 +1123,7 @@ app.whenReady().then(() => {
   registerIpc();
   createWidget();
   createTray();
+  setupUpdater();
 
   globalShortcut.register('CommandOrControl+Shift+H', () => toggleWidget());
 
@@ -957,6 +1163,7 @@ app.on('will-quit', () => {
   if (themeTimer) clearInterval(themeTimer);
   if (tuckTimer) clearInterval(tuckTimer);
   if (tuckAnim) clearInterval(tuckAnim);
+  if (updateTimer) clearInterval(updateTimer);
   globalShortcut.unregisterAll();
 });
 

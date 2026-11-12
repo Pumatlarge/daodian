@@ -1,7 +1,7 @@
 {
   "name": "daodian",
   "productName": "到点",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A Windows desktop salary-ticker widget: watch today's pay fill up, and see your hourly rate dilute when you work overtime.",
   "main": "electron/main.js",
   "author": "Feitong Jiang",
@@ -19,7 +19,7 @@
     "start": "electron .",
     "dev": "electron . --dev",
     "test": "node tests/calc.test.js",
-    "dist": "electron-builder --win nsis portable"
+    "dist": "electron-builder --win nsis portable --publish never"
   },
   "devDependencies": {
     "electron": "^45.3.0",
@@ -31,6 +31,12 @@
     "copyright": "Copyright © 2026 Feitong Jiang",
     "directories": {
       "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Pumatlarge",
+      "repo": "daodian",
+      "releaseType": "release"
     },
     "files": [
       "electron/**/*",
@@ -64,5 +70,8 @@
     "portable": {
       "artifactName": "Daodian-${version}-Portable.${ext}"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
   }
 }

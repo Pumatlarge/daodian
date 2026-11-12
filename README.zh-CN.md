@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.1.1" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.2.0" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -52,19 +52,22 @@
 - **隐私模式。** 一键把金额变成 `¥•••`，只保留进度条。开放工位、投屏、地铁上都用得着。
 - **像个正常的桌面居民。** 无边框透明、置顶、可拖动、贴边吸附、记住位置、托盘常驻、开机自启，`Ctrl + Shift + H` 秒隐藏。
 - **边缘自动收纳。** 可选：鼠标离开一段时间后，卡片滑进最近的左 / 右屏幕边缘，只留一个发光小把手；鼠标碰到把手再滑回来。延迟 1–10 秒可调。
+- **安装版自动更新。** 启动时和每 6 小时检查 GitHub Releases，后台下载，退出时自动安装；托盘和设置页显示进度，也可以手动检查。便携版只能检查后打开下载页。自动检查可以在设置里关。
 - **一点点仪式感。** 满格时金币粒子 + 三声轻响 + Windows 通知，都能单独关。
-- **纯本地。** 不登录、不埋点、不联网，所有数据就在本机一个 JSON 文件里。
+- **纯本地。** 不登录、不埋点；唯一的联网是检查更新（可关），其他数据都在本机一个 JSON 文件里。
 
 ## 下载
 
 | 版本 | 文件 | 说明 |
 | --- | --- | --- |
-| 安装包 | [Daodian-0.1.1-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.1/Daodian-0.1.1-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
-| 便携版 | [Daodian-0.1.1-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.1/Daodian-0.1.1-Portable.exe) | 单文件，免安装 |
+| 安装包 | [Daodian-0.2.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.0/Daodian-0.2.0-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
+| 便携版 | [Daodian-0.2.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.0/Daodian-0.2.0-Portable.exe) | 单文件，免安装 |
 
 [全部版本](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
 > 程序没有代码签名，首次运行 Windows SmartScreen 可能提示，点 **更多信息 → 仍要运行** 即可。卸载安装包时不会删除你的本地设置。
+>
+> 从 0.2.0 开始，安装版会从 GitHub Releases 自动更新；便携版不会自动更新，点「检查更新」会打开 Releases 页面。
 
 ## 第一次打开
 
@@ -107,6 +110,7 @@
 - 每套皮肤的强调色、背景图、圆角、字体；全局字号和透明度。
 - 显示项：目标、百分比、剩余时间、时薪、加班时薪条、隐私模式。
 - 置顶、开机自启、到点通知、音效、边缘自动收纳和延迟。
+- 自动更新开关、当前版本、检查更新、重启并安装。
 
 ## 操作
 
@@ -116,7 +120,7 @@
 | 右键 | 皮肤、透明度、边缘收纳、立即收纳、隐私、置顶、自启、退出 |
 | 悬停右上角 | 眼睛（隐私）、图钉（自动收纳）、齿轮（设置） |
 | `Ctrl + Shift + H` | 隐藏 / 显示小组件 |
-| 托盘图标 | 左键显示 / 隐藏，右键完整菜单 |
+| 托盘图标 | 左键显示 / 隐藏，右键完整菜单（含更新状态） |
 | 边缘小把手 | 收纳后出现，鼠标碰上去卡片滑回来 |
 
 ## 隐私
@@ -129,7 +133,7 @@
 %APPDATA%\到点\assets\           自定义背景图的本地副本
 ```
 
-没有网络请求、没有统计、没有账号。配置是纯 JSON，隐私模式隐藏的是显示，不是文件。如果你手动改坏了主配置，程序会尝试读取 `.bak`。
+没有统计、没有账号。唯一的网络请求是检查 GitHub Releases 更新（默认启动时和每 6 小时一次，可在设置里关闭）。配置是纯 JSON，隐私模式隐藏的是显示，不是文件。如果你手动改坏了主配置，程序会尝试读取 `.bak`。
 
 ## 从源码构建
 
@@ -147,8 +151,10 @@ npm run dist     # 同时构建安装包和便携版
 输出：
 
 ```text
-dist/Daodian-0.1.1-Setup.exe
-dist/Daodian-0.1.1-Portable.exe
+dist/Daodian-0.2.0-Setup.exe
+dist/Daodian-0.2.0-Setup.exe.blockmap
+dist/latest.yml
+dist/Daodian-0.2.0-Portable.exe
 ```
 
 Electron 或 NSIS 下载慢的话，可以先设镜像：
@@ -173,12 +179,28 @@ tests/           计算测试
 
 界面目前是简体中文；计算层不依赖 DOM / Electron，欢迎补英文界面。
 
+## 发布新版本
+
+安装版会从 GitHub Releases 原地更新。改版本号后运行 `npm run dist`，会同时生成更新清单和 blockmap。0.2.0 之后的每个 Release 都要上传这四类文件：
+
+```text
+Daodian-<version>-Setup.exe
+Daodian-<version>-Setup.exe.blockmap
+latest.yml
+Daodian-<version>-Portable.exe   （自动更新不需要，但便携版用户要手动下载）
+```
+
+创建 tag 为 `v<version>` 的 Release，上传这些文件，并标记为 latest。更新器读取 `latest.yml`，从该 Release 下载 Setup；不要重命名 `latest.yml`，blockmap 要和 Setup 保持同名并放在旁边，更新器会用它对下载做差分。
+
+第一个带更新器的版本是 **0.2.0**，需要已安装用户手动装一次；从那以后安装版才能自动收到后续版本。便携版始终手动下载。
+
 ## 已知限制
 
+- **自动更新从 0.2.0 开始。** 0.1.x 用户需要手动装一次 0.2.0，之后的版本才会原地更新。
 - **法定节假日没有内置。** 只按工作日模式判断，调休 / 节假日日历在路线图里。
 - **不跟踪实际打卡。** 按你设置的班次计算，晚到、早退不会自动扣减显示金额。
 - **只支持 Windows。** 透明窗口和托盘行为是针对 Windows 10/11 调的。
-- **没有代码签名。** 安装包和便携版都没有签名证书。
+- **没有代码签名。** 安装包、便携版和自动更新都没有签名证书；Windows SmartScreen 可能提示。正式分发建议配证书。
 - **大小周有锚点。** 以你标记为「大周」的那一周为锚点隔周交替；换工作或换班次后记得重新勾一下。
 
 ## 路线图
@@ -191,7 +213,7 @@ tests/           计算测试
 
 ## 参与
 
-欢迎提 Issue 和 PR。提交前请保证 `npm test` 全绿；计算逻辑请留在 `shared/calc.js`，不要引入 DOM / Electron 依赖；不要加入埋点或网络请求。
+欢迎提 Issue 和 PR。提交前请保证 `npm test` 全绿；计算逻辑请留在 `shared/calc.js`，不要引入 DOM / Electron 依赖；不要加入埋点或与更新无关的网络请求。
 
 ## 许可
 

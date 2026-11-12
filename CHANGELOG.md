@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.0 — 2026-11-12
+
+### Added
+
+- Automatic updates for installed (NSIS) builds via `electron-updater` and GitHub Releases: check on launch and every six hours, download in the background, install on quit, restart-and-install from Settings or the tray, progress in the tray menu, and a notification when the download is ready.
+- “About & updates” settings section: current version, auto-check toggle, check-now and restart-to-install controls.
+- Portable builds can check for updates and open the latest release page; they never self-update.
+- `autoUpdate` setting (enabled by default).
+
+### Changed
+
+- Release builds now generate `latest.yml` and the installer blockmap; the project publishes through the GitHub provider.
+
+### Notes
+
+- The first updater-enabled release is 0.2.0; users on 0.1.x need to install it manually once.
+- Updates are unsigned; a code-signing certificate is recommended for wider distribution.
+
 ## 0.1.1 — 2026-11-12
 
 A small but important follow-up to the first release.

@@ -359,6 +359,7 @@ body {
 }
 
 .tool {
+  position: relative;
   width: 20px;
   height: 20px;
   display: flex;
@@ -391,6 +392,18 @@ body {
   width: 13px;
   height: 13px;
   display: block;
+}
+
+.tool.has-update::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent, #d18957);
+  box-shadow: 0 0 6px var(--accent, #d18957);
 }
 
 .is-rest .amount {

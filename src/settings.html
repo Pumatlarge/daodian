@@ -234,6 +234,25 @@
         </div>
         <p class="hint">快捷键：<b>Ctrl + Shift + H</b> 隐藏 / 显示小组件；右键小组件或托盘图标可以快速换肤、调透明度、切隐私模式。</p>
       </section>
+
+      <section>
+        <h2>关于与更新</h2>
+        <div class="switch">
+          <div class="txt"><b>自动检查更新</b><small>启动后与每 6 小时检查一次 GitHub Releases；仅安装版会自动下载</small></div>
+          <input id="autoUpdate" type="checkbox" />
+        </div>
+        <div class="update-panel">
+          <div class="update-main">
+            <div class="update-version">当前版本 <b id="appVersion">—</b></div>
+            <div class="update-status" id="updateStatus">正在读取…</div>
+          </div>
+          <div class="update-actions">
+            <button class="btn ghost small" id="btnCheckUpdate" type="button">检查更新</button>
+            <button class="btn primary small" id="btnInstallUpdate" type="button" hidden>重启并安装</button>
+          </div>
+        </div>
+        <p class="hint">安装版会后台下载并在退出时自动安装；便携版不会自动更新，检查更新会打开 Releases 页面。</p>
+      </section>
     </main>
 
     <div class="foot-note">

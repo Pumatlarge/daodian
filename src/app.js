@@ -109,6 +109,13 @@ function updateTuckButton() {
   btnTuck.title = on ? '关闭边缘自动收纳' : '自动收纳到边缘';
 }
 
+function applyUpdateInfo(info) {
+  if (!btnSettings) return;
+  const ready = !!info && info.status === 'downloaded';
+  btnSettings.classList.toggle('has-update', ready);
+  btnSettings.title = ready ? '设置（有新版本待安装）' : '设置';
+}
+
 function setTuckUi(payload) {
   if (payload && payload.collapsed) {
     app.dataset.tuck = payload.side || 'right';
@@ -583,6 +590,8 @@ async function init() {
   });
 
   bridge.onTuck((payload) => setTuckUi(payload));
+  bridge.onUpdate((info) => applyUpdateInfo(info));
+  bridge.getUpdateInfo().then((info) => applyUpdateInfo(info)).catch(() => {});
 
   btnEye.addEventListener('click', async (event) => {
     event.stopPropagation();

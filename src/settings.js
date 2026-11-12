@@ -16,6 +16,7 @@ const $ = (id) => document.getElementById(id);
 
 let cfg = null;
 let effective = null;
+let updateState = null;
 let customizeId = 'cream';
 let toastTimer = null;
 let varTimer = null;
@@ -89,6 +90,7 @@ function fillForm() {
     'alwaysOnTop',
     'autostart',
     'autoTuck',
+    'autoUpdate',
     'notify',
     'sound'
   ];
@@ -214,6 +216,39 @@ function markActive() {
     const badge = card.querySelector('.tc-badge');
     if (badge) badge.hidden = !active;
   });
+}
+
+function renderUpdate() {
+  const info = updateState;
+  if (!info) return;
+  $('appVersion').textContent = info.currentVersion || '—';
+  const status = info.status;
+  let text = '尚未检查更新';
+  if (status === 'dev') {
+    text = '开发模式：自动更新仅在打包后的安装版中启用';
+  } else if (status === 'portable') {
+    text = '便携版：请手动下载新版本';
+  } else if (status === 'checking') {
+    text = '正在检查更新…';
+  } else if (status === 'available') {
+    text = '发现 v' + info.version + '，准备下载…';
+  } else if (status === 'downloading') {
+    text = '正在下载 v' + info.version + ' · ' + info.percent + '%';
+  } else if (status === 'downloaded') {
+    text = 'v' + info.version + ' 已下载，退出时会自动安装';
+  } else if (status === 'current') {
+    text = '已是最新版本 v' + info.currentVersion;
+  } else if (status === 'error') {
+    text = '检查失败：' + (info.error || '网络错误');
+  }
+  $('updateStatus').textContent = text;
+  $('btnInstallUpdate').hidden = status !== 'downloaded';
+  $('btnCheckUpdate').disabled = status === 'checking' || status === 'downloading';
+  $('btnCheckUpdate').textContent = info.portable
+    ? '打开下载页'
+    : status === 'error'
+      ? '重试'
+      : '检查更新';
 }
 
 async function save(patch, options) {
@@ -416,6 +451,7 @@ function bind() {
     'alwaysOnTop',
     'autostart',
     'autoTuck',
+    'autoUpdate',
     'notify',
     'sound'
   ];
@@ -426,6 +462,25 @@ function bind() {
   }
 
   $('autoTuck').addEventListener('change', syncTuckDelay);
+
+  $('btnCheckUpdate').addEventListener('click', async () => {
+    $('updateStatus').textContent = '正在检查更新…';
+    $('btnCheckUpdate').disabled = true;
+    const info = await bridge.checkForUpdates();
+    if (info) {
+      updateState = info;
+      renderUpdate();
+    }
+  });
+
+  $('btnInstallUpdate').addEventListener('click', () => {
+    bridge.installUpdate();
+  });
+
+  bridge.onUpdate((info) => {
+    updateState = info;
+    renderUpdate();
+  });
 
   $('btnClose').addEventListener('click', () => bridge.closeSelf());
   $('btnData').addEventListener('click', () => bridge.openDataDir());
@@ -453,7 +508,9 @@ async function init() {
   fillForm();
   updatePreview();
   await updateEffective();
+  updateState = await bridge.getUpdateInfo();
   bind();
+  renderUpdate();
 }
 
 init().catch((err) => {
