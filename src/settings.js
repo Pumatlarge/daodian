@@ -3,12 +3,14 @@
 const {
   validateSchedule,
   schedule,
+  computeState,
   formatMoney,
   mondayOf,
   isoDate,
   addDays,
   parseISODate,
-  parseTime
+  parseTime,
+  timeLabel
 } = window.DaodianCalc;
 const THEMES = window.THEMES;
 const bridge = window.api;
@@ -24,6 +26,10 @@ let pendingVars = null;
 let fontSizeTimer = null;
 let opacityTimer = null;
 let tuckDelayTimer = null;
+let clockGraceTimer = null;
+let statsDays = {};
+let statsMode = 'day';
+let statsAnchor = new Date();
 
 function themeById(id) {
   return THEMES.find((t) => t.id === id) || THEMES[0];
@@ -79,6 +85,7 @@ function fillForm() {
   setValueIfIdle('nightTheme', cfg.nightTheme);
   setValueIfIdle('dayStart', cfg.dayStart);
   setValueIfIdle('dayEnd', cfg.dayEnd);
+  setValueIfIdle('clockMode', cfg.clockMode);
 
   const toggles = [
     'showTarget',
@@ -92,7 +99,10 @@ function fillForm() {
     'autoTuck',
     'autoUpdate',
     'notify',
-    'sound'
+    'sound',
+    'clockLate',
+    'clockEarly',
+    'clockOvertime'
   ];
   for (const id of toggles) {
     const node = $(id);
@@ -105,11 +115,30 @@ function fillForm() {
   $('opacityOut').textContent = Math.round(cfg.opacity * 100) + '%';
   $('tuckDelay').value = cfg.tuckDelay;
   $('tuckDelayOut').textContent = cfg.tuckDelay + 's';
+  $('clockGrace').value = cfg.clockGraceMin;
+  $('clockGraceOut').textContent = cfg.clockGraceMin + ' 分钟';
 
   showModeFields();
+  showClockFields();
   updateBigWeek();
   syncTuckDelay();
   loadCustomize();
+}
+
+function showClockFields() {
+  const custom = cfg.clockMode === 'custom';
+  $('clockCustom').hidden = !custom;
+  const hint = $('clockHint');
+  if (cfg.clockMode === 'punch') {
+    hint.textContent =
+      '金额从上班打卡开始，下班打卡后停止；迟到、早退会少算，晚走继续按加班计算。';
+  } else if (custom) {
+    hint.textContent =
+      '分别选择迟到、早退和加班怎么算；宽限时间内的迟到 / 早退不扣，未打卡时仍按班次计算。';
+  } else {
+    hint.textContent =
+      '打卡只记录上下班时间，金额始终按设置的班次计算；打卡按钮会出现在上班 / 下班时间附近。';
+  }
 }
 
 function syncTuckDelay() {
@@ -277,6 +306,204 @@ function queueVar(key, value) {
     varTimer = null;
     save({ themeVars: vars }, { quiet: true });
   }, 260);
+}
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function startOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function endOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}
+
+async function loadStats() {
+  try {
+    const data = await bridge.getStats();
+    statsDays = (data && data.days) || {};
+  } catch (e) {
+    statsDays = {};
+  }
+}
+
+function liveStatsDay() {
+  if (!cfg) return null;
+  const s = computeState(cfg, new Date());
+  if (!s.workday) return null;
+  return {
+    date: isoDate(s.now),
+    workday: true,
+    earned: s.earned,
+    target: s.target,
+    workedSec: s.paidSec,
+    overtimeSec: s.overtimeSec,
+    punchIn: s.punchIn,
+    punchOut: s.punchOut
+  };
+}
+
+function mergedStatsDays() {
+  const days = { ...statsDays };
+  const live = liveStatsDay();
+  if (live) days[live.date] = live;
+  return days;
+}
+
+function statHours(seconds) {
+  return (Math.max(0, Number(seconds) || 0) / 3600).toFixed(1) + ' h';
+}
+
+function statCard(label, value) {
+  return '<div class="stat-card"><span>' + label + '</span><b>' + value + '</b></div>';
+}
+
+function statBarChart(items) {
+  const max = Math.max(1, ...items.map((item) => item.value));
+  return (
+    '<div class="stat-bars">' +
+    items
+      .map((item) => {
+        const height = item.value > 0 ? Math.max(2, (item.value / max) * 100) : 0;
+        return (
+          '<div class="stat-bar" title="' +
+          item.title +
+          '"><div class="stat-bar-track"><i style="height:' +
+          height.toFixed(1) +
+          '%"></i></div><em>' +
+          item.display +
+          '</em></div>'
+        );
+      })
+      .join('') +
+    '</div>'
+  );
+}
+
+function statsPeriodText() {
+  const y = statsAnchor.getFullYear();
+  const m = statsAnchor.getMonth() + 1;
+  if (statsMode === 'day') return y + '年' + m + '月' + statsAnchor.getDate() + '日';
+  if (statsMode === 'month') return y + '年' + m + '月';
+  return y + '年';
+}
+
+function canGoNext() {
+  const now = new Date();
+  if (statsMode === 'day') return startOfDay(statsAnchor) < startOfDay(now);
+  if (statsMode === 'month') return startOfMonth(statsAnchor) < startOfMonth(now);
+  return statsAnchor.getFullYear() < now.getFullYear();
+}
+
+function renderStats() {
+  if (!cfg) return;
+  const days = mergedStatsDays();
+  const cards = [];
+  let chart = '';
+
+  $('statsPeriod').textContent = statsPeriodText();
+  $('statsNext').disabled = !canGoNext();
+  for (const btn of $('statsMode').querySelectorAll('button')) {
+    btn.classList.toggle('on', btn.dataset.mode === statsMode);
+  }
+
+  if (statsMode === 'day') {
+    const rec = days[isoDate(statsAnchor)];
+    const target = rec ? rec.target : schedule(cfg).dailyPay;
+    const earned = rec ? Number(rec.earned) || 0 : 0;
+    cards.push(statCard('已赚', formatMoney(earned)));
+    cards.push(statCard('目标', formatMoney(target)));
+    cards.push(statCard('计薪工时', statHours(rec ? rec.workedSec : 0)));
+    cards.push(statCard('加班', statHours(rec ? rec.overtimeSec : 0)));
+    cards.push(statCard('上班', rec && rec.punchIn != null ? timeLabel(rec.punchIn) : '未打卡'));
+    cards.push(statCard('下班', rec && rec.punchOut != null ? timeLabel(rec.punchOut) : '未打卡'));
+    const pct = target > 0 ? Math.min(100, (earned / target) * 100) : 0;
+    chart = rec
+      ? '<div class="stat-progress"><i style="width:' +
+        pct.toFixed(1) +
+        '%"></i></div><div class="stat-progress-label">' +
+        pct.toFixed(0) +
+        '% · ' +
+        formatMoney(earned) +
+        ' / ' +
+        formatMoney(target) +
+        '</div>'
+      : '<div class="stat-empty">这一天还没有打卡或工资记录</div>';
+  } else {
+    const from =
+      statsMode === 'month' ? startOfMonth(statsAnchor) : new Date(statsAnchor.getFullYear(), 0, 1);
+    const to =
+      statsMode === 'month'
+        ? endOfMonth(statsAnchor)
+        : new Date(statsAnchor.getFullYear(), 11, 31);
+    const records = Object.values(days).filter(
+      (d) => d.workday && d.date >= isoDate(from) && d.date <= isoDate(to)
+    );
+    const totalEarned = records.reduce((sum, d) => sum + (Number(d.earned) || 0), 0);
+    const totalWorked = records.reduce((sum, d) => sum + (Number(d.workedSec) || 0), 0);
+    const totalOt = records.reduce((sum, d) => sum + (Number(d.overtimeSec) || 0), 0);
+    const totalTarget = records.reduce((sum, d) => sum + (Number(d.target) || 0), 0);
+    const count = records.length;
+
+    cards.push(
+      statCard(statsMode === 'month' ? '本月已赚' : '本年已赚', formatMoney(totalEarned))
+    );
+    cards.push(statCard('日均', count ? formatMoney(totalEarned / count) : '—'));
+    cards.push(statCard('记录天数', count + ' 天'));
+    cards.push(statCard('计薪工时', statHours(totalWorked)));
+    cards.push(statCard('加班', statHours(totalOt)));
+    cards.push(
+      statCard(
+        '目标完成',
+        totalTarget > 0 ? Math.round((totalEarned / totalTarget) * 100) + '%' : '—'
+      )
+    );
+
+    if (statsMode === 'month') {
+      const total = endOfMonth(statsAnchor).getDate();
+      const items = [];
+      for (let day = 1; day <= total; day += 1) {
+        const key = isoDate(new Date(statsAnchor.getFullYear(), statsAnchor.getMonth(), day));
+        const rec = days[key];
+        items.push({
+          value: rec ? Number(rec.earned) || 0 : 0,
+          display: day === 1 || day % 5 === 0 ? String(day) : '',
+          title: key + ' · ' + (rec ? formatMoney(rec.earned) : '无记录')
+        });
+      }
+      chart = statBarChart(items);
+    } else {
+      const year = statsAnchor.getFullYear();
+      const items = [];
+      for (let month = 1; month <= 12; month += 1) {
+        const prefix = year + '-' + String(month).padStart(2, '0');
+        let sum = 0;
+        let countDays = 0;
+        for (const rec of Object.values(days)) {
+          if (rec.workday && rec.date.slice(0, 7) === prefix) {
+            sum += Number(rec.earned) || 0;
+            countDays += 1;
+          }
+        }
+        items.push({
+          value: sum,
+          display: String(month),
+          title: month + '月 · ' + formatMoney(sum) + ' · ' + countDays + ' 天'
+        });
+      }
+      chart = statBarChart(items);
+    }
+
+    if (!records.length) {
+      chart +=
+        '<div class="stat-empty">这段时间还没有记录，工资统计会在使用后逐步累积。</div>';
+    }
+  }
+
+  $('statsCards').innerHTML = cards.join('');
+  $('statsChart').innerHTML = chart;
 }
 
 function bind() {
@@ -453,7 +680,10 @@ function bind() {
     'autoTuck',
     'autoUpdate',
     'notify',
-    'sound'
+    'sound',
+    'clockLate',
+    'clockEarly',
+    'clockOvertime'
   ];
   for (const id of toggles) {
     $(id).addEventListener('change', () => {
@@ -462,6 +692,47 @@ function bind() {
   }
 
   $('autoTuck').addEventListener('change', syncTuckDelay);
+
+  $('clockMode').addEventListener('change', async () => {
+    await save({ clockMode: $('clockMode').value });
+    showClockFields();
+  });
+
+  $('clockGrace').addEventListener('input', () => {
+    const value = Number($('clockGrace').value);
+    $('clockGraceOut').textContent = value + ' 分钟';
+    if (clockGraceTimer) clearTimeout(clockGraceTimer);
+    clockGraceTimer = setTimeout(() => save({ clockGraceMin: value }, { quiet: true }), 240);
+  });
+
+  $('statsMode').addEventListener('click', (event) => {
+    const btn = event.target.closest('button[data-mode]');
+    if (!btn) return;
+    statsMode = btn.dataset.mode;
+    statsAnchor = new Date();
+    renderStats();
+  });
+
+  $('statsPrev').addEventListener('click', () => {
+    if (statsMode === 'day') statsAnchor = addDays(statsAnchor, -1);
+    else if (statsMode === 'month') {
+      statsAnchor = new Date(statsAnchor.getFullYear(), statsAnchor.getMonth() - 1, 1);
+    } else {
+      statsAnchor = new Date(statsAnchor.getFullYear() - 1, 0, 1);
+    }
+    renderStats();
+  });
+
+  $('statsNext').addEventListener('click', () => {
+    if (!canGoNext()) return;
+    if (statsMode === 'day') statsAnchor = addDays(statsAnchor, 1);
+    else if (statsMode === 'month') {
+      statsAnchor = new Date(statsAnchor.getFullYear(), statsAnchor.getMonth() + 1, 1);
+    } else {
+      statsAnchor = new Date(statsAnchor.getFullYear() + 1, 0, 1);
+    }
+    renderStats();
+  });
 
   $('btnCheckUpdate').addEventListener('click', async () => {
     $('updateStatus').textContent = '正在检查更新…';
@@ -494,6 +765,7 @@ function bind() {
     if (!next) return;
     cfg = next;
     fillForm();
+    renderStats();
   });
 
   bridge.onTheme((theme) => {
@@ -513,8 +785,15 @@ async function init() {
   updatePreview();
   await updateEffective();
   updateState = await bridge.getUpdateInfo();
+  await loadStats();
   bind();
   renderUpdate();
+  renderStats();
+  setInterval(async () => {
+    if (document.hidden) return;
+    await loadStats();
+    renderStats();
+  }, 30000);
 }
 
 init().catch((err) => {

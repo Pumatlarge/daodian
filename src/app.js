@@ -17,6 +17,7 @@ const content = document.getElementById('content');
 const btnEye = document.getElementById('btn-eye');
 const btnTuck = document.getElementById('btn-tuck');
 const btnSettings = document.getElementById('btn-settings');
+const btnPunch = document.getElementById('punchBtn');
 
 const FONT_STACKS = {
   system: '-apple-system, "Segoe UI", "Microsoft YaHei", sans-serif',
@@ -77,6 +78,7 @@ let imageToken = 0;
 let loadedBgPath = null;
 let fadeTimer = null;
 let summaryCounter = 0;
+let statsCounter = 0;
 
 function themeById(id) {
   return THEMES.find((t) => t.id === id) || THEMES[0];
@@ -276,13 +278,26 @@ function pillText(s) {
   if (s.phase === 'rest') return '休息日';
   if (s.phase === 'before') return '未上班';
   if (s.phase === 'lunch') return '午休中';
+  if (s.phase === 'done') return '已下班';
   if (s.phase === 'overtime') return s.overtimeSec < 60 ? '已下班' : '加班中';
+  if (s.punched && s.punchIn != null) return '工作中 · ' + timeLabel(s.punchIn);
   return '工作中';
 }
 
 function footLeft(s) {
   if (s.phase === 'rest') {
     return s.nextWorkday ? '下次上班 ' + s.nextWorkday.label : '好好休息';
+  }
+  if (s.phase === 'done') {
+    if (s.punchIn == null) return '今日已下班';
+    let text = '上班 ' + timeLabel(s.punchIn);
+    if (s.punchOut != null) text += ' · 下班 ' + timeLabel(s.punchOut);
+    if (s.overtimeSec >= 60) {
+      text += ' · 加班 ' + formatOvertime(s.overtimeSec);
+    } else if (s.punchOut != null && s.punchOut < s.endM) {
+      text += ' · 早退 ' + formatDuration((s.endM - s.punchOut) * 60);
+    }
+    return text;
   }
   if (!cfg.showRemaining) return '';
   if (s.phase === 'before') return '距离上班 ' + formatDuration(s.remainingSec);
@@ -297,13 +312,41 @@ function footRight(s) {
   if (s.phase === 'rest') return '';
   if (!cfg.showHourly) return '';
   const money = (v) => (cfg.privacy ? '¥•••' : formatMoney(v));
-  if (s.phase === 'overtime') {
+  if (s.phase === 'overtime' || (s.phase === 'done' && s.overtimeSec >= 60)) {
     if (s.overtimeMode === 'pay') {
       return '加班费 +' + money(s.overtimePay);
     }
     return '准点下班 ' + money(s.hourly);
   }
   return '时薪 ' + money(s.hourly);
+}
+
+function punchKind(s) {
+  if (!s || !s.workday || s.phase === 'rest') return null;
+  const now = new Date();
+  const nowM = now.getHours() * 60 + now.getMinutes();
+  if (!s.punched) {
+    if (nowM >= s.startM - 60 && nowM <= s.startM + 120) return 'in';
+    return null;
+  }
+  if (s.punchOut == null && nowM >= s.endM - 60) return 'out';
+  return null;
+}
+
+function updatePunch(s) {
+  if (!btnPunch) return;
+  const kind = punchKind(s);
+  if (kind) {
+    if (btnPunch.dataset.kind !== kind) {
+      btnPunch.dataset.kind = kind;
+      btnPunch.textContent = kind === 'in' ? '打卡上班' : '打卡下班';
+    }
+    if (btnPunch.hidden) btnPunch.hidden = false;
+    if (app.dataset.punch !== kind) app.dataset.punch = kind;
+  } else {
+    if (!btnPunch.hidden) btnPunch.hidden = true;
+    if (app.dataset.punch) app.removeAttribute('data-punch');
+  }
 }
 
 function updateJar(progress) {
@@ -323,6 +366,7 @@ function render(s) {
   const layout = app.dataset.layout;
   const isRest = s.phase === 'rest';
   const isOvertime = s.phase === 'overtime';
+  const isDone = s.phase === 'done';
   const privacy = !!cfg.privacy;
   const money = (v) => (privacy ? '¥•••' : formatMoney(v));
   const percent = Math.round(s.progress * 100);
@@ -339,6 +383,14 @@ function render(s) {
     const full = s.earned >= s.target - 0.005;
     label =
       s.overtimeMode === 'pay'
+        ? '今日已赚 · 含加班'
+        : full
+          ? '今日工资已到账'
+          : '今日已赚';
+  } else if (isDone) {
+    const full = s.earned >= s.target - 0.005;
+    label =
+      s.overtimeMode === 'pay' && s.overtimeSec >= 60
         ? '今日已赚 · 含加班'
         : full
           ? '今日工资已到账'
@@ -391,14 +443,15 @@ function render(s) {
     stamp.style.display = isRest || !cfg.showPercent ? 'none' : 'flex';
   }
 
-  const otVisible = isOvertime && !isRest && cfg.showOvertime;
+  const otVisible =
+    (isOvertime || (isDone && s.overtimeSec >= 60)) && !isRest && cfg.showOvertime;
   const strip = el('otStrip');
   if (strip) {
     strip.classList.toggle('show', otVisible);
     strip.classList.toggle('warn', otVisible && s.retention < 0.9 && s.retention >= 0.8);
     strip.classList.toggle('bad', otVisible && s.retention < 0.8);
   }
-  if (isOvertime) {
+  if (otVisible) {
     setText('effLabel', s.overtimeMode === 'pay' ? '加班时薪' : '实际时薪');
     setText('effRate', money(s.effHourly));
     setText(
@@ -421,6 +474,7 @@ function render(s) {
     setText('footLeft', left);
     setText('footRight', right);
   }
+  updatePunch(s);
 }
 
 function celebrate() {
@@ -519,6 +573,25 @@ function tick() {
     summaryCounter = 0;
     sendSummary();
   }
+  statsCounter += 1;
+  if (statsCounter >= 600) {
+    statsCounter = 0;
+    recordStats();
+  }
+}
+
+function recordStats() {
+  if (!state || !state.workday) return;
+  bridge.recordStats({
+    date: isoDate(state.now),
+    workday: true,
+    earned: state.earned,
+    target: state.target,
+    workedSec: Math.round(state.paidSec || 0),
+    overtimeSec: Math.round(state.overtimeSec || 0),
+    punchIn: state.punchIn,
+    punchOut: state.punchOut
+  });
 }
 
 function sendSummary() {
@@ -526,6 +599,7 @@ function sendSummary() {
   let text;
   if (cfg.privacy) {
     if (state.phase === 'rest') text = '到点 · 今天休息';
+    else if (state.phase === 'done') text = '到点 · 已下班';
     else if (state.phase === 'overtime') text = '到点 · 已下班';
     else if (state.phase === 'before') text = '到点 · 还没上班';
     else text = '到点 · 工作中';
@@ -533,7 +607,12 @@ function sendSummary() {
     return;
   }
   if (state.phase === 'rest') text = '到点 · 今天休息';
-  else if (state.phase === 'overtime') {
+  else if (state.phase === 'done') {
+    text =
+      state.overtimeMode === 'pay' && state.overtimeSec >= 60
+        ? '到点 · 已下班 · 加班费 +' + formatMoney(state.overtimePay)
+        : '到点 · 已下班 · 今日 ' + formatMoney(state.earned);
+  } else if (state.phase === 'overtime') {
     text =
       state.overtimeMode === 'pay'
         ? '到点 · 已下班 · 加班费 +' + formatMoney(state.overtimePay)
@@ -604,6 +683,24 @@ async function init() {
     event.stopPropagation();
     bridge.openSettings();
   });
+
+  if (btnPunch) {
+    btnPunch.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      const kind = btnPunch.dataset.kind;
+      if (kind !== 'in' && kind !== 'out') return;
+      const next = await bridge.punch(kind);
+      if (next) {
+        cfg = next;
+        state = computeState(cfg, new Date());
+        render(state);
+        recordStats();
+        sendSummary();
+      }
+    });
+  }
+
+  setTimeout(recordStats, 1500);
 
   document.addEventListener('contextmenu', (event) => {
     event.preventDefault();

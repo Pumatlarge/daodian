@@ -23,6 +23,14 @@ const DEFAULTS = {
   workPattern: 'five_two',
   bigSmallAnchor: null,
   overtimeMode: 'dilute',
+  clockMode: 'schedule',
+  clockLate: true,
+  clockEarly: true,
+  clockOvertime: true,
+  clockGraceMin: 0,
+  punchDate: null,
+  punchIn: null,
+  punchOut: null,
 
   themeMode: 'time',
   dayTheme: 'cream',
@@ -106,6 +114,26 @@ function normalize(raw) {
     lunchStart: pickTime(merged.lunchStart, DEFAULTS.lunchStart),
     workPattern: PATTERNS.includes(merged.workPattern) ? merged.workPattern : DEFAULTS.workPattern,
     overtimeMode: merged.overtimeMode === 'pay' ? 'pay' : 'dilute',
+    clockMode:
+      merged.clockMode === 'punch' || merged.clockMode === 'custom'
+        ? merged.clockMode
+        : 'schedule',
+    clockLate: merged.clockLate !== false,
+    clockEarly: merged.clockEarly !== false,
+    clockOvertime: merged.clockOvertime !== false,
+    clockGraceMin: clamp(Math.round(Number(merged.clockGraceMin) || 0), 0, 60),
+    punchDate:
+      typeof merged.punchDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(merged.punchDate)
+        ? merged.punchDate
+        : null,
+    punchIn:
+      merged.punchIn != null && Number.isFinite(Number(merged.punchIn))
+        ? clamp(Math.round(Number(merged.punchIn)), 0, 1439)
+        : null,
+    punchOut:
+      merged.punchOut != null && Number.isFinite(Number(merged.punchOut))
+        ? clamp(Math.round(Number(merged.punchOut)), 0, 1439)
+        : null,
     themeMode: THEME_MODES.includes(merged.themeMode) ? merged.themeMode : 'time',
     dayTheme: pickTheme(merged.dayTheme, DEFAULTS.dayTheme),
     nightTheme: pickTheme(merged.nightTheme, DEFAULTS.nightTheme),

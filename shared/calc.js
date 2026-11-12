@@ -173,43 +173,104 @@
     };
   }
 
-  function workedSecondsAt(now, startAt, lunchStartAt, lunchEndAt, endAt) {
-    const cap = Math.min(now.getTime(), endAt.getTime());
-    if (cap <= startAt.getTime()) return 0;
-    const ls = Math.max(lunchStartAt.getTime(), startAt.getTime());
-    const le = Math.min(lunchEndAt.getTime(), endAt.getTime());
-    let overlap = 0;
-    if (le > ls) overlap = Math.max(0, Math.min(cap, le) - ls);
-    const total = cap - startAt.getTime() - overlap;
-    const max = endAt.getTime() - startAt.getTime() - Math.max(0, le - ls);
-    return clamp(total / 1000, 0, max / 1000);
+  function workedSecondsBetween(fromAt, toAt, lunchStartAt, lunchEndAt) {
+    if (!(toAt > fromAt)) return 0;
+    const ls = Math.max(lunchStartAt.getTime(), fromAt.getTime());
+    const le = Math.min(lunchEndAt.getTime(), toAt.getTime());
+    const overlap = le > ls ? le - ls : 0;
+    return Math.max(0, (toAt - fromAt - overlap) / 1000);
   }
 
   function computeState(cfg, nowInput) {
     const now = nowInput instanceof Date ? nowInput : new Date();
     const sc = schedule(cfg);
-    const startAt = atMinutes(now, sc.startM);
-    const endAt = atMinutes(now, sc.endM);
+    const plannedStartAt = atMinutes(now, sc.startM);
+    const plannedEndAt = atMinutes(now, sc.endM);
     const lunchStartAt = atMinutes(now, sc.lunchStartM);
     const lunchEndAt = atMinutes(now, sc.lunchEndM);
     const workSec = sc.workSeconds;
     const perSec = sc.dailyPay / workSec;
     const workday = isWorkday(cfg, now);
     const mode = cfg.overtimeMode === 'pay' ? 'pay' : 'dilute';
+    const clockMode =
+      cfg.clockMode === 'punch' || cfg.clockMode === 'custom' ? cfg.clockMode : 'schedule';
+    const grace = clamp(num(cfg.clockGraceMin, 0), 0, 60);
+
+    const today = isoDate(now);
+    const punchedToday =
+      cfg.punchDate === today &&
+      cfg.punchIn != null &&
+      Number.isFinite(Number(cfg.punchIn));
+    const punchIn = punchedToday ? clamp(Math.round(Number(cfg.punchIn)), 0, 1439) : null;
+    let punchOut = null;
+    if (punchedToday && cfg.punchOut != null && Number.isFinite(Number(cfg.punchOut))) {
+      const out = clamp(Math.round(Number(cfg.punchOut)), 0, 1439);
+      if (out >= punchIn) punchOut = out;
+    }
+
+    let payStartM = sc.startM;
+    if (clockMode !== 'schedule' && punchIn != null) {
+      if (clockMode === 'punch') {
+        payStartM = punchIn;
+      } else if (cfg.clockLate !== false) {
+        payStartM = punchIn > sc.startM + grace ? punchIn : sc.startM;
+      }
+    }
+
+    let done = false;
+    let baseEndM = sc.endM;
+    if (clockMode !== 'schedule' && punchOut != null) {
+      done = true;
+      if (clockMode === 'punch') {
+        baseEndM = Math.min(punchOut, sc.endM);
+      } else if (cfg.clockEarly !== false) {
+        baseEndM = punchOut < sc.endM - grace ? punchOut : sc.endM;
+      }
+    }
+
+    const noOvertime = clockMode === 'custom' && cfg.clockOvertime === false;
+    if (!done && noOvertime && now.getTime() >= plannedEndAt.getTime()) {
+      done = true;
+      baseEndM = sc.endM;
+    }
+
+    const payStartAt = atMinutes(now, payStartM);
+    const baseEndAt = done
+      ? atMinutes(now, baseEndM)
+      : new Date(Math.min(now.getTime(), plannedEndAt.getTime()));
+    const workedSec = workedSecondsBetween(payStartAt, baseEndAt, lunchStartAt, lunchEndAt);
+    const paidSec = Math.min(workedSec, workSec);
+    const overtimeSec = noOvertime
+      ? 0
+      : Math.max(
+          0,
+          ((done ? atMinutes(now, punchOut != null ? punchOut : baseEndM) : now).getTime() -
+            plannedEndAt.getTime()) /
+            1000
+        );
 
     const state = {
       now,
       ...sc,
       workday,
-      startAt,
-      endAt,
+      clockMode,
+      payStartM,
+      startAt: payStartAt,
+      endAt: plannedEndAt,
+      plannedStartAt,
+      plannedEndAt,
       lunchStartAt,
       lunchEndAt,
+      punchIn,
+      punchOut,
+      punched: punchedToday,
       phase: 'rest',
       progress: 0,
       earned: 0,
       target: sc.dailyPay,
-      overtimeSec: 0,
+      workedSec,
+      paidSec,
+      overtimeSec,
       overtimePay: 0,
       effHourly: sc.hourly,
       retention: 1,
@@ -226,35 +287,38 @@
       return state;
     }
 
-    const worked = workedSecondsAt(now, startAt, lunchStartAt, lunchEndAt, endAt);
-    state.progress = clamp(worked / workSec, 0, 1);
-    state.earned = Math.min(worked, workSec) * perSec;
+    state.progress = clamp(paidSec / workSec, 0, 1);
+    state.earned = paidSec * perSec;
 
-    if (now < startAt) {
-      state.phase = 'before';
-      state.remainingSec = (startAt - now) / 1000;
-    } else if (now >= endAt) {
-      state.phase = 'overtime';
-      state.overtimeSec = Math.max(0, (now.getTime() - endAt.getTime()) / 1000);
+    if (done) {
+      state.phase = 'done';
       state.remainingSec = 0;
-    } else if (now >= lunchStartAt && now < lunchEndAt) {
+    } else if (now.getTime() < payStartAt.getTime()) {
+      state.phase = 'before';
+      state.remainingSec = (payStartAt - now) / 1000;
+    } else if (now.getTime() >= plannedEndAt.getTime()) {
+      state.phase = 'overtime';
+      state.remainingSec = 0;
+    } else if (
+      now.getTime() >= lunchStartAt.getTime() &&
+      now.getTime() < lunchEndAt.getTime()
+    ) {
       state.phase = 'lunch';
-      state.remainingSec = (endAt - now) / 1000;
+      state.remainingSec = (plannedEndAt - now) / 1000;
     } else {
       state.phase = 'working';
-      state.remainingSec = (endAt - now) / 1000;
+      state.remainingSec = (plannedEndAt - now) / 1000;
     }
 
-    if (state.phase === 'overtime') {
-      const ot = state.overtimeSec;
+    if (state.overtimeSec > 0) {
       if (mode === 'pay') {
-        state.overtimePay = (ot / 3600) * sc.hourly * 1.5;
-        state.earned = sc.dailyPay + state.overtimePay;
+        state.overtimePay = (state.overtimeSec / 3600) * sc.hourly * 1.5;
+        state.earned += state.overtimePay;
         state.effHourly = sc.hourly * 1.5;
         state.retention = 1;
         state.delta = 0;
       } else {
-        const totalHours = (Math.min(worked, workSec) + ot) / 3600;
+        const totalHours = (paidSec + state.overtimeSec) / 3600;
         state.effHourly = totalHours > 0 ? state.earned / totalHours : sc.hourly;
         state.retention = sc.hourly > 0 ? state.effHourly / sc.hourly : 1;
         state.delta = Math.max(0, sc.hourly - state.effHourly);

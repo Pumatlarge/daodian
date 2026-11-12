@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.0 — 2026-11-12
+
+### Added
+
+- **Clock in / clock out.** A punch button appears at the bottom of the card around the configured start and end times (one hour before the start for clock-in, two hours before the end for clock-out). The tray and widget menus also offer punch / undo. Only the current day is stored; a new day starts fresh.
+- **Three ways to pay a punched day.** Settings → “Clock & pay”:
+  - **Scheduled shift (default):** punches are recorded and shown, but the money follows the configured hours.
+  - **Actual punches:** pay starts at the clock-in time, stops at clock-out, late arrival and early leave reduce the amount, and staying late adds overtime.
+  - **Custom:** choose whether late arrival and early leave affect pay, set a 0–30 minute grace period, and decide whether time after the shift counts as overtime.
+- **Work statistics.** Settings → “Work statistics” with day / month / year views: earned, target, paid hours, overtime, punch times, recorded days, daily average and target completion, plus a day-by-day or month-by-month bar chart. Today updates live; history is stored in `stats.json`.
+- Settings → About & updates now has a **GitHub project home** row with an “Open GitHub” button.
+
+### Changed
+
+- The config gains `clockMode`, `clockLate`, `clockEarly`, `clockOvertime`, `clockGraceMin`, `punchDate`, `punchIn` and `punchOut`; older configs default to the scheduled-shift mode.
+- The daily work statistics are recorded about once a minute while the app is running and immediately when punching, so closing the app loses at most the last minute of the current day.
+- README: added the clock-in and statistics features, `stats.json`, and updated the “no attendance tracking” limitation.
+
 ## 0.2.5 — 2026-11-12
 
 ### Added

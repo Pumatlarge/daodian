@@ -479,3 +479,52 @@ body {
       var(--shadow, 0 10px 24px rgba(0, 0, 0, 0.2));
   }
 }
+
+/* Clock-in / clock-out action, shown only around the shift edges. It sits in
+   the footer line and temporarily replaces the footer text, so the card does
+   not need to grow for it. */
+.punch-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  transform: translateX(-50%);
+  z-index: 9;
+  height: 20px;
+  padding: 0 13px;
+  border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--accent, #d18957) 62%, transparent);
+  background: color-mix(in srgb, var(--accent, #d18957) 14%, var(--bg-solid, #fff));
+  color: var(--accent, #d18957);
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--accent, #d18957) 22%, transparent);
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.punch-btn[hidden] {
+  display: none;
+}
+
+.punch-btn:hover {
+  background: color-mix(in srgb, var(--accent, #d18957) 28%, var(--bg-solid, #fff));
+  border-color: var(--accent, #d18957);
+  box-shadow: 0 2px 14px color-mix(in srgb, var(--accent, #d18957) 38%, transparent);
+}
+
+.punch-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+#app[data-punch] .foot,
+#app[data-punch] .rfoot {
+  visibility: hidden;
+}
+
+#app[data-tuck] .punch-btn {
+  display: none;
+}

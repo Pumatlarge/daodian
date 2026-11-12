@@ -85,6 +85,42 @@
       </section>
 
       <section>
+        <h2>打卡与计算</h2>
+        <label class="field">
+          <span>打卡后如何计薪</span>
+          <select id="clockMode">
+            <option value="schedule">按设置的班次计算（默认）</option>
+            <option value="punch">按实际打卡时间计算</option>
+            <option value="custom">自定义</option>
+          </select>
+        </label>
+        <div id="clockCustom" hidden>
+          <div class="grid2 clock-custom">
+            <label class="field">
+              <span>迟到 / 早退宽限</span>
+              <div class="range-row">
+                <input id="clockGrace" type="range" min="0" max="30" step="1" />
+                <output id="clockGraceOut">0 分钟</output>
+              </div>
+            </label>
+          </div>
+          <label class="inline-check">
+            <input id="clockLate" type="checkbox" />
+            迟到时从实际打卡时间开始计钱
+          </label>
+          <label class="inline-check">
+            <input id="clockEarly" type="checkbox" />
+            早退时在下班打卡时间停止计钱
+          </label>
+          <label class="inline-check">
+            <input id="clockOvertime" type="checkbox" />
+            班次结束后继续按加班计算
+          </label>
+        </div>
+        <p class="hint" id="clockHint">打卡按钮会出现在上班 / 下班时间附近；按班次计算时只记录打卡时间，不影响金额。</p>
+      </section>
+
+      <section>
         <h2>皮肤与切换</h2>
         <div class="effective" id="effectiveRow">
           <span id="effectiveText">当前生效：奶油手账 · 跟随时间</span>
@@ -233,6 +269,25 @@
           </div>
         </div>
         <p class="hint">快捷键：<b>Ctrl + Shift + H</b> 隐藏 / 显示小组件；右键小组件或托盘图标可以快速换肤、调透明度、切隐私模式。</p>
+      </section>
+
+      <section>
+        <h2>工作统计</h2>
+        <div class="stats-head">
+          <div class="segmented" id="statsMode">
+            <button type="button" data-mode="day" class="on">日</button>
+            <button type="button" data-mode="month">月</button>
+            <button type="button" data-mode="year">年</button>
+          </div>
+          <div class="stats-period">
+            <button class="stats-nav" id="statsPrev" type="button" aria-label="上一段">‹</button>
+            <b id="statsPeriod">—</b>
+            <button class="stats-nav" id="statsNext" type="button" aria-label="下一段">›</button>
+          </div>
+        </div>
+        <div class="stat-cards" id="statsCards"></div>
+        <div class="stat-chart" id="statsChart"></div>
+        <p class="hint">统计从本版本开始记录；今天的数字会实时更新，历史数据保存在本机 stats.json。</p>
       </section>
 
       <section>

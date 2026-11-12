@@ -17,6 +17,8 @@ const {
 const path = require('path');
 const fs = require('fs');
 const store = require('./store');
+const stats = require('./stats');
+const { isoDate, timeLabel, isWorkday } = require('../shared/calc');
 const { effectiveTheme } = require('./theme');
 const THEMES = require('../shared/themes');
 const { autoUpdater } = require('electron-updater');
@@ -400,6 +402,38 @@ function themeSubmenu() {
   ];
 }
 
+function punch(kind) {
+  if (!cfg) return null;
+  const now = new Date();
+  const date = isoDate(now);
+  const minute = now.getHours() * 60 + now.getMinutes();
+  const current = cfg.punchDate === date;
+  let punchIn = current && cfg.punchIn != null ? cfg.punchIn : null;
+  let punchOut = current && cfg.punchOut != null ? cfg.punchOut : null;
+  if (kind === 'in') {
+    if (punchIn != null) return cfg;
+    punchIn = minute;
+    punchOut = null;
+  } else if (kind === 'out') {
+    if (punchIn == null || punchOut != null) return cfg;
+    punchOut = Math.max(minute, punchIn);
+  } else {
+    return cfg;
+  }
+  cfg = store.save({ punchDate: date, punchIn, punchOut });
+  broadcastConfig();
+  refreshMenus();
+  return cfg;
+}
+
+function clearPunch() {
+  if (!cfg) return null;
+  cfg = store.save({ punchDate: null, punchIn: null, punchOut: null });
+  broadcastConfig();
+  refreshMenus();
+  return cfg;
+}
+
 function buildMenu(kind) {
   const visible = win && !win.isDestroyed() && win.isVisible();
   return Menu.buildFromTemplate([
@@ -408,6 +442,30 @@ function buildMenu(kind) {
       click: () => toggleWidget()
     },
     { label: '打开设置…', click: () => openSettings() },
+    ...(function punchMenuItems() {
+      if (!cfg) return [];
+      const now = new Date();
+      if (!isWorkday(cfg, now)) return [];
+      const today = isoDate(now);
+      const punched = cfg.punchDate === today && cfg.punchIn != null;
+      const ended = punched && cfg.punchOut != null;
+      if (!punched) {
+        return [{ label: '打卡上班', click: () => punch('in') }];
+      }
+      if (!ended) {
+        return [
+          { label: '打卡下班', click: () => punch('out') },
+          { label: '撤销今日打卡', click: () => clearPunch() }
+        ];
+      }
+      return [
+        {
+          label: '今日已打卡 ' + timeLabel(cfg.punchIn) + '–' + timeLabel(cfg.punchOut),
+          enabled: false
+        },
+        { label: '撤销今日打卡', click: () => clearPunch() }
+      ];
+    })(),
     { type: 'separator' },
     { label: '皮肤', submenu: themeSubmenu() },
     { label: '透明度', submenu: opacitySubmenu() },
@@ -1071,6 +1129,11 @@ function registerIpc() {
     side: tuck.side
   }));
 
+  ipcMain.handle('punch:mark', (event, kind) => punch(kind === 'out' ? 'out' : 'in'));
+  ipcMain.handle('punch:clear', () => clearPunch());
+  ipcMain.handle('stats:record', (event, entry) => stats.record(entry));
+  ipcMain.handle('stats:get', () => stats.list());
+
   ipcMain.handle('settings:open', () => {
     openSettings();
     return true;
@@ -1192,6 +1255,7 @@ function tickTheme() {
 
 app.whenReady().then(() => {
   cfg = store.init();
+  stats.init();
 
   registerIpc();
   createWidget();
@@ -1233,6 +1297,7 @@ app.on('before-quit', () => {
 });
 
 app.on('will-quit', () => {
+  stats.flush();
   if (themeTimer) clearInterval(themeTimer);
   if (tuckTimer) clearInterval(tuckTimer);
   if (tuckAnim) clearInterval(tuckAnim);

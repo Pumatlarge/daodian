@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.2.5" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.3.0" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -52,6 +52,8 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 - **Privacy mode.** One click turns every amount into `¥•••` while keeping the progress bar. Useful in an open office, on a screen share, or on a train.
 - **A proper desktop citizen.** Frameless and transparent, always on top, draggable, snap-to-edge, remembers its position, lives in the tray, can start with Windows. `Ctrl + Shift + H` hides or shows it instantly.
 - **Edge auto-tuck.** Optional: after a configurable delay the card slides into the nearest left/right screen edge, leaving a small glowing handle. Hover the handle and it slides back. Delay is adjustable from 1 to 10 seconds.
+- **Clock in / clock out.** Around your start and end times the card offers a punch button. Settings lets you choose what a punch means: keep the configured shift (default; punches are only recorded), use the actual punch times, or a custom mix with a late/early grace period and optional overtime.
+- **Work statistics.** Settings → Work statistics shows day, month and year totals: earned, paid hours, overtime, recorded days and target completion, with a daily or monthly chart. Today updates live; history lives in `stats.json` on this machine.
 - **Updates in place.** Installed builds check GitHub Releases on launch and every six hours and download in the background. When the download finishes the app asks whether to install; nothing installs on quit without confirmation, and the installer window stays visible while it runs. A tray item and the settings page show progress; the check can be disabled. Portable builds can check and open the latest release page.
 - **A tiny bit of ceremony.** When the bar fills: confetti, a three-note chime and a Windows notification (each can be disabled).
 - **Local only.** No accounts, no telemetry. The only network call is the optional update check against GitHub Releases; everything else lives in a JSON file on your machine.
@@ -60,8 +62,8 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 
 | Build | File | Notes |
 | --- | --- | --- |
-| Installer | [Daodian-0.2.5-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.5/Daodian-0.2.5-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
-| Portable | [Daodian-0.2.5-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.5/Daodian-0.2.5-Portable.exe) | Single file, no installation |
+| Installer | [Daodian-0.3.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
+| Portable | [Daodian-0.3.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Portable.exe) | Single file, no installation |
 
 [All releases](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -110,6 +112,7 @@ Everything is editable after onboarding:
 - Per-skin accent, background image, radius, font; global font size and opacity.
 - Display toggles: target, percentage, remaining time, hourly rate, overtime strip, privacy.
 - Always-on-top, autostart, notifications, chime, edge auto-tuck and its delay.
+- Clock-in calculation mode (schedule / actual punch / custom with grace) and work statistics by day, month and year.
 - Auto-update toggle, current version, check-now and install-update controls, plus a GitHub project link.
 
 ## Controls
@@ -122,6 +125,7 @@ Everything is editable after onboarding:
 | `Ctrl + Shift + H` | Hide / show the widget |
 | Tray icon | Left-click toggles; right-click opens the full menu, including update status |
 | Edge handle | Appears while tucked; hover to bring the card back |
+| Punch button | Appears around start / end times; records a punch and, if enabled, changes how the day is paid |
 
 ## Privacy
 
@@ -131,6 +135,7 @@ Daodian stores only what it needs to draw the widget:
 %APPDATA%\到点\config.json       settings, schedule, last position
 %APPDATA%\到点\config.json.bak   previous successful save
 %APPDATA%\到点\assets\           copies of custom background images
+%APPDATA%\到点\stats.json        daily work statistics by date
 ```
 
 No analytics and no account. The only network request is the update check against GitHub Releases (on launch and every six hours when auto-update is enabled); it can be disabled in Settings. The config is plain JSON — privacy mode hides the display, not the file. If you edit the file by hand, the app falls back to the `.bak` copy when the main file cannot be parsed.
@@ -151,10 +156,10 @@ npm run dist     # installer + portable build
 Outputs:
 
 ```text
-dist/Daodian-0.2.5-Setup.exe
-dist/Daodian-0.2.5-Setup.exe.blockmap
+dist/Daodian-0.3.0-Setup.exe
+dist/Daodian-0.3.0-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.2.5-Portable.exe
+dist/Daodian-0.3.0-Portable.exe
 ```
 
 If Electron or NSIS downloads are slow, set the mirrors first:
@@ -198,7 +203,7 @@ The first updater-enabled build, **0.2.0**, has to be installed manually once. F
 
 - **Auto-updates start with 0.2.0.** Users on 0.1.x need a one-time manual install of 0.2.0; later versions update in place.
 - **Public holidays are not built in.** Days are classified by the work pattern only; 调休/holiday calendars are on the roadmap.
-- **No clock-in tracking.** The widget follows the schedule you configure; arriving late or leaving early does not automatically reduce the displayed pay.
+- **Punches are optional.** The default mode follows the configured shift; punches are recorded but do not change the pay. Switch to “actual punch time” or “custom” in Settings to let late arrivals, early leave and overtime come from your punches.
 - **Windows only.** The transparent-window and tray behavior is tuned for Windows 10/11.
 - **Unsigned builds and updates.** No code-signing certificate is configured; Windows SmartScreen may warn. A signing certificate is recommended for wider distribution.
 - **Big/small week anchor.** The alternation is anchored to the week you mark as a “big week”; change jobs or shifts and re-check it.
