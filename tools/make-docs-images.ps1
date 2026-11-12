@@ -87,7 +87,7 @@ function New-Hero([string]$out, [bool]$chinese) {
   $g.DrawLine($linePen, 96, 548, 700, 548)
   $linePen.Dispose()
 
-  Draw-Text $g 'v0.3.0   ·   Windows 10 / 11   ·   MIT' 'Segoe UI' 15 ([System.Drawing.FontStyle]::Regular) $dim 96 690
+  Draw-Text $g 'v0.3.1   ·   Windows 10 / 11   ·   MIT' 'Segoe UI' 15 ([System.Drawing.FontStyle]::Regular) $dim 96 690
 
   Draw-ImageFile $g (Join-Path $docs 'overtime.png') 856 186 720 388
 

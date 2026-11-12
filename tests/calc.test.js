@@ -245,6 +245,13 @@ test('custom mode can end the day at the scheduled time without overtime', () =>
   assert.ok(Math.abs(s.earned - 367.8161) < 0.001);
 });
 
+test('a punch-in after the scheduled end does not invent overtime', () => {
+  const s = calc.computeState({ ...punchCfg, punchIn: 1155 }, at(9, 19, 15));
+  assert.strictEqual(s.overtimeSec, 0);
+  assert.strictEqual(s.earned, 0);
+  assert.ok(Math.abs(s.effHourly - s.hourly) < 0.001);
+});
+
 test('a punch from another day is ignored', () => {
   const s = calc.computeState(
     { ...punchCfg, punchDate: '2026-11-08', punchIn: 600, punchOut: 1020 },

@@ -1,10 +1,20 @@
 # Changelog
 
+## 0.3.1 — 2026-11-12
+
+### Fixed
+
+- The punch control is now always on the card on a workday instead of only appearing around the shift times. It reads “打卡上班” until you clock in and “打卡下班” until you clock out; no right-click menu is needed. The footer still shows the distance/hourly text, and the button is larger.
+- Clicking the panel's “打卡下班” button reliably records the clock-out. The button state is recomputed from the saved config after every punch, including when the config broadcast arrives before the IPC response.
+- A punch-in after the scheduled end no longer invents overtime from the scheduled end; overtime starts at the actual punch-in.
+- The overtime strip is hidden when there is no base work, so an after-hours punch no longer shows a misleading ¥0.00 effective hourly.
+- The punch button label updates immediately after a language switch.
+
 ## 0.3.0 — 2026-11-12
 
 ### Added
 
-- **Clock in / clock out.** A punch button appears at the bottom of the card around the configured start and end times (one hour before the start for clock-in, one hour before the end for clock-out). The tray and widget menus also offer punch / undo. Only the current day is stored; a new day starts fresh.
+- **Clock in / clock out.** On a workday the panel footer carries a punch button: it reads “打卡上班” until you clock in, then “打卡下班” until you clock out. It stays available all day instead of only around the shift edges, so no menu is needed. The tray and widget menus also offer punch / undo. Only the current day is stored; a new day starts fresh.
 - **Three ways to pay a punched day.** Settings → “Clock & pay”:
   - **Scheduled shift (default):** punches are recorded and shown, but the money follows the configured hours.
   - **Actual punches:** pay starts at the clock-in time, stops at clock-out, late arrival and early leave reduce the amount, and staying late adds overtime.

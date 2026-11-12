@@ -358,13 +358,8 @@ function footRight(s) {
 
 function punchKind(s) {
   if (!s || !s.workday || s.phase === 'rest') return null;
-  const now = new Date();
-  const nowM = now.getHours() * 60 + now.getMinutes();
-  if (!s.punched) {
-    if (nowM >= s.startM - 60 && nowM <= s.startM + 120) return 'in';
-    return null;
-  }
-  if (s.punchOut == null && nowM >= s.endM - 60) return 'out';
+  if (!s.punched) return 'in';
+  if (s.punchOut == null) return 'out';
   return null;
 }
 
@@ -372,9 +367,10 @@ function updatePunch(s) {
   if (!btnPunch) return;
   const kind = punchKind(s);
   if (kind) {
-    if (btnPunch.dataset.kind !== kind) {
+    const label = kind === 'in' ? tr('打卡上班') : tr('打卡下班');
+    if (btnPunch.dataset.kind !== kind || btnPunch.textContent !== label) {
       btnPunch.dataset.kind = kind;
-      btnPunch.textContent = kind === 'in' ? tr('打卡上班') : tr('打卡下班');
+      btnPunch.textContent = label;
     }
     if (btnPunch.hidden) btnPunch.hidden = false;
     if (app.dataset.punch !== kind) app.dataset.punch = kind;
@@ -479,7 +475,10 @@ function render(s) {
   }
 
   const otVisible =
-    (isOvertime || (isDone && s.overtimeSec >= 60)) && !isRest && cfg.showOvertime;
+    (isOvertime || (isDone && s.overtimeSec >= 60)) &&
+    !isRest &&
+    cfg.showOvertime &&
+    s.paidSec > 0;
   const strip = el('otStrip');
   if (strip) {
     strip.classList.toggle('show', otVisible);
@@ -669,7 +668,8 @@ async function handleConfig(next) {
   applyCustomization(themeId);
   if (languageChanged) {
     build();
-  } else if (state) {
+  } else {
+    state = computeState(cfg, new Date());
     render(state);
   }
 }

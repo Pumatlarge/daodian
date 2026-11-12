@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.3.0" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.3.1" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -52,7 +52,7 @@
 - **隐私模式。** 一键把金额变成 `¥•••`，只保留进度条。开放工位、投屏、地铁上都用得着。
 - **像个正常的桌面居民。** 无边框透明、置顶、可拖动、贴边吸附、记住位置、托盘常驻、开机自启，`Ctrl + Shift + H` 秒隐藏。
 - **边缘自动收纳。** 可选：鼠标离开一段时间后，卡片滑进最近的左 / 右屏幕边缘，只留一个发光小把手；鼠标碰到把手再滑回来。延迟 1–10 秒可调。
-- **打卡上下班。** 上班 / 下班时间附近，卡片底部会出现打卡按钮。设置里可以决定打卡怎么计薪：仍按设置的班次（默认，打卡只记录时间）、按实际打卡时间，或者自定义迟到 / 早退宽限和加班规则。
+- **打卡上下班。** 工作日时，卡片底部直接有打卡按钮：未打卡时显示「打卡上班」，打卡后变成「打卡下班」，全天可用，不再只在上下班时间附近出现，也不用打开右键菜单。托盘 / 右键菜单里也有打卡和撤销。设置里可以决定打卡怎么计薪：仍按设置的班次（默认）、按实际打卡时间，或自定义迟到 / 早退宽限和加班规则。
 - **工作统计，独立窗口。** 从小组件或托盘菜单打开「工作统计…」。月视图是带工资热力、加班标记和心情表情的日历；年视图是 12 个迷你月历；日视图有完成度圆环、打卡时间、班次时间轴和心情选择。今天实时更新，历史保存在本机 `stats.json`。
 - **心情和备注。** 日视图里可以选 6 种心情（😄 🙂 😐 😫 😴 🔥）并写一段备注，心情表情会显示在月历里，数据保存在 `stats.json`。
 - **中英文切换。** 界面完整支持英文，在首次设置或设置页顶部的语言开关里选择中文 / English；默认中文。托盘菜单、对话框、通知和统计窗口都会跟随切换。
@@ -64,8 +64,8 @@
 
 | 版本 | 文件 | 说明 |
 | --- | --- | --- |
-| 安装包 | [Daodian-0.3.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
-| 便携版 | [Daodian-0.3.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.0/Daodian-0.3.0-Portable.exe) | 单文件，免安装 |
+| 安装包 | [Daodian-0.3.1-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.1/Daodian-0.3.1-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
+| 便携版 | [Daodian-0.3.1-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.3.1/Daodian-0.3.1-Portable.exe) | 单文件，免安装 |
 
 [全部版本](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -128,7 +128,7 @@
 | `Ctrl + Shift + H` | 隐藏 / 显示小组件 |
 | 托盘图标 | 左键显示 / 隐藏，右键完整菜单（含工作统计和更新状态） |
 | 边缘小把手 | 收纳后出现，鼠标碰上去卡片滑回来 |
-| 打卡按钮 | 上下班时间附近出现；记录打卡，并在启用实际打卡计薪时改变当天金额 |
+| 打卡按钮 | 工作日直接显示在卡片底部：先「打卡上班」，之后变「打卡下班」；不用打开菜单 |
 | 工作统计… | 打开独立统计窗口：月历、年历、日详情；点某一天可以写心情和备注 |
 | 语言开关 | 首次设置或设置页顶部：中文 / English |
 
@@ -161,10 +161,10 @@ npm run dist     # 同时构建安装包和便携版
 输出：
 
 ```text
-dist/Daodian-0.3.0-Setup.exe
-dist/Daodian-0.3.0-Setup.exe.blockmap
+dist/Daodian-0.3.1-Setup.exe
+dist/Daodian-0.3.1-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.3.0-Portable.exe
+dist/Daodian-0.3.1-Portable.exe
 ```
 
 Electron 或 NSIS 下载慢的话，可以先设镜像：

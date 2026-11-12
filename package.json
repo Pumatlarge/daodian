@@ -1,7 +1,7 @@
 {
   "name": "daodian",
   "productName": "到点",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A Windows desktop salary-ticker widget: watch today's pay fill up, and see your hourly rate dilute when you work overtime.",
   "main": "electron/main.js",
   "author": "Feitong Jiang",

@@ -486,17 +486,17 @@ body {
 .punch-btn {
   position: absolute;
   left: 50%;
-  bottom: 9px;
+  bottom: 6px;
   transform: translateX(-50%);
   z-index: 9;
-  height: 20px;
-  padding: 0 13px;
+  height: 24px;
+  padding: 0 15px;
   border-radius: 99px;
   border: 1px solid color-mix(in srgb, var(--accent, #d18957) 62%, transparent);
-  background: color-mix(in srgb, var(--accent, #d18957) 14%, var(--bg-solid, #fff));
+  background: color-mix(in srgb, var(--accent, #d18957) 16%, var(--bg-solid, #fff));
   color: var(--accent, #d18957);
   font: inherit;
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-weight: 650;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -520,7 +520,6 @@ body {
   transform: translateX(-50%) scale(0.97);
 }
 
-#app[data-punch] .foot,
 #app[data-punch] .rfoot {
   visibility: hidden;
 }

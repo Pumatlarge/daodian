@@ -240,14 +240,15 @@
       : new Date(Math.min(now.getTime(), plannedEndAt.getTime()));
     const workedSec = workedSecondsBetween(payStartAt, baseEndAt, lunchStartAt, lunchEndAt);
     const paidSec = Math.min(workedSec, workSec);
+    const overtimeStartAt = new Date(
+      Math.max(plannedEndAt.getTime(), payStartAt.getTime())
+    );
+    const overtimeEndAt = done
+      ? atMinutes(now, punchOut != null ? punchOut : baseEndM)
+      : now;
     const overtimeSec = noOvertime
       ? 0
-      : Math.max(
-          0,
-          ((done ? atMinutes(now, punchOut != null ? punchOut : baseEndM) : now).getTime() -
-            plannedEndAt.getTime()) /
-            1000
-        );
+      : Math.max(0, (overtimeEndAt.getTime() - overtimeStartAt.getTime()) / 1000);
 
     const state = {
       now,
