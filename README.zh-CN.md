@@ -10,15 +10,15 @@
 </p>
 
 <p align="center">
-  <a href="README.md"><img alt="English" src="https://img.shields.io/badge/English-0f172a?style=for-the-badge"></a>
-  <a href="README.zh-CN.md"><img alt="简体中文" src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-c9a24a?style=for-the-badge"></a>
+  <a href="README.md"><img alt="English" src="docs/badges/english-dark.svg" height="36"></a>
+  <a href="README.zh-CN.md"><img alt="简体中文" src="docs/badges/chinese-gold.svg" height="36"></a>
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-0.1.0-c9a24a?style=flat-square">
-  <img alt="platform" src="https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-0f172a?style=flat-square">
-  <img alt="license" src="https://img.shields.io/badge/license-MIT-4f7a5e?style=flat-square">
-  <img alt="electron" src="https://img.shields.io/badge/Electron-45-2b3a55?style=flat-square&logo=electron&logoColor=9feaf9">
+  <img alt="version 0.1.0" src="docs/badges/version.svg" height="28">
+  <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
+  <img alt="MIT" src="docs/badges/license.svg" height="28">
+  <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
 </p>
 
 ---
