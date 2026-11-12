@@ -235,7 +235,7 @@ function renderUpdate() {
   } else if (status === 'downloading') {
     text = '正在下载 v' + info.version + ' · ' + info.percent + '%';
   } else if (status === 'downloaded') {
-    text = 'v' + info.version + ' 已下载，退出时会自动安装';
+    text = 'v' + info.version + ' 已下载，点击「安装更新」后才会安装';
   } else if (status === 'current') {
     text = '已是最新版本 v' + info.currentVersion;
   } else if (status === 'error') {

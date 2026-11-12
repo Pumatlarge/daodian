@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.2.3" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.2.4" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -52,7 +52,7 @@
 - **隐私模式。** 一键把金额变成 `¥•••`，只保留进度条。开放工位、投屏、地铁上都用得着。
 - **像个正常的桌面居民。** 无边框透明、置顶、可拖动、贴边吸附、记住位置、托盘常驻、开机自启，`Ctrl + Shift + H` 秒隐藏。
 - **边缘自动收纳。** 可选：鼠标离开一段时间后，卡片滑进最近的左 / 右屏幕边缘，只留一个发光小把手；鼠标碰到把手再滑回来。延迟 1–10 秒可调。
-- **安装版自动更新。** 启动时和每 6 小时检查 GitHub Releases，后台下载，退出时自动安装；托盘和设置页显示进度，也可以手动检查。便携版只能检查后打开下载页。自动检查可以在设置里关。
+- **安装版原地更新。** 启动时和每 6 小时检查 GitHub Releases 并后台下载；下载完成后会先询问是否安装，确认后才打开安装程序，不会在退出时静默安装。托盘和设置页显示进度，也可以手动检查。便携版只能检查后打开下载页，自动检查可以在设置里关。
 - **一点点仪式感。** 满格时金币粒子 + 三声轻响 + Windows 通知，都能单独关。
 - **纯本地。** 不登录、不埋点；唯一的联网是检查更新（可关），其他数据都在本机一个 JSON 文件里。
 
@@ -60,8 +60,8 @@
 
 | 版本 | 文件 | 说明 |
 | --- | --- | --- |
-| 安装包 | [Daodian-0.2.3-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.3/Daodian-0.2.3-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
-| 便携版 | [Daodian-0.2.3-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.3/Daodian-0.2.3-Portable.exe) | 单文件，免安装 |
+| 安装包 | [Daodian-0.2.4-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.4/Daodian-0.2.4-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
+| 便携版 | [Daodian-0.2.4-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.4/Daodian-0.2.4-Portable.exe) | 单文件，免安装 |
 
 [全部版本](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -110,7 +110,7 @@
 - 每套皮肤的强调色、背景图、圆角、字体；全局字号和透明度。
 - 显示项：目标、百分比、剩余时间、时薪、加班时薪条、隐私模式。
 - 置顶、开机自启、到点通知、音效、边缘自动收纳和延迟。
-- 自动更新开关、当前版本、检查更新、重启并安装。
+- 自动更新开关、当前版本、检查更新、安装更新。
 
 ## 操作
 
@@ -151,10 +151,10 @@ npm run dist     # 同时构建安装包和便携版
 输出：
 
 ```text
-dist/Daodian-0.2.3-Setup.exe
-dist/Daodian-0.2.3-Setup.exe.blockmap
+dist/Daodian-0.2.4-Setup.exe
+dist/Daodian-0.2.4-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.2.3-Portable.exe
+dist/Daodian-0.2.4-Portable.exe
 ```
 
 Electron 或 NSIS 下载慢的话，可以先设镜像：

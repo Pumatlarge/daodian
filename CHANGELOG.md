@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.4 — 2026-11-12
+
+### Changed
+
+- Updates are no longer installed silently when the app quits. After an update finishes downloading, 到点 asks whether to install now or later. Choosing “later” never installs on its own; the update stays ready in the tray menu and in Settings → About & updates.
+- Confirming an update now opens the installer window, so the installation is visible instead of happening in the background. `electron-updater` used to run the Setup with `/S` on quit.
+- The ready notification, settings status text and tray item now describe the confirmation flow instead of promising an automatic install on exit.
+
 ## 0.2.3 — 2026-11-12
 
 ### Fixed

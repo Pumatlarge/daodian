@@ -57,6 +57,7 @@ let lastMenuShown = 0;
 let updateTimer = null;
 let pendingVersion = null;
 let updateNotifiedVersion = null;
+let updatePromptVersion = null;
 let lastProgressAt = 0;
 const isPortable = !!(
   process.env.PORTABLE_EXECUTABLE_FILE || process.env.PORTABLE_EXECUTABLE_DIR
@@ -216,7 +217,7 @@ function setupUpdater() {
   }
 
   autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.autoRunAppAfterInstall = true;
   autoUpdater.allowPrerelease = false;
   autoUpdater.allowDowngrade = false;
@@ -266,13 +267,17 @@ function setupUpdater() {
       try {
         new Notification({
           title: '到点 · 新版本已就绪',
-          body: 'v' + info.version + ' 已下载，退出到点时会自动安装。',
+          body: 'v' + info.version + ' 已下载，可在托盘或设置中确认安装。',
           icon: asset('icon.png'),
           silent: true
         }).show();
       } catch (error) {
         /* notifications are optional */
       }
+    }
+    if (updatePromptVersion !== info.version) {
+      updatePromptVersion = info.version;
+      promptInstallUpdate(info.version);
     }
   });
 
@@ -324,12 +329,45 @@ function installUpdate() {
   quitting = true;
   setImmediate(() => {
     try {
+      // Not silent: the NSIS installer window stays visible so the user can
+      // see that 到点 is being installed/updated.
       autoUpdater.quitAndInstall(false, true);
     } catch (error) {
       logTuckError('update-install-failed', { error: String(error) });
     }
   });
   return true;
+}
+
+async function promptInstallUpdate(version) {
+  const parent = win && !win.isDestroyed() && win.isVisible() ? win : undefined;
+  const options = {
+    type: 'question',
+    buttons: ['现在安装', '稍后'],
+    defaultId: 0,
+    cancelId: 1,
+    noLink: true,
+    icon: nativeImage.createFromPath(asset('icon.png')),
+    title: '到点 · 更新已就绪',
+    message: 'v' + version + ' 已下载完成',
+    detail:
+      '现在安装会关闭到点，并打开安装程序完成更新。' +
+      '选择「稍后」不会自动安装，可以随时从托盘菜单或设置里的按钮安装。'
+  };
+  let result;
+  try {
+    result = parent
+      ? await dialog.showMessageBox(parent, options)
+      : await dialog.showMessageBox(options);
+  } catch (error) {
+    logTuckError('update-prompt-failed', { error: String(error) });
+    return;
+  }
+  if (result && result.response === 0) {
+    installUpdate();
+  } else {
+    refreshMenus();
+  }
 }
 
 function opacitySubmenu() {
@@ -398,7 +436,7 @@ function buildMenu(kind) {
     ...(pendingVersion
       ? [
           {
-            label: '重启并安装 v' + pendingVersion,
+            label: '安装更新 v' + pendingVersion,
             click: () => installUpdate()
           }
         ]
