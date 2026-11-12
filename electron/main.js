@@ -61,6 +61,38 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function logTuckError(kind, data) {
+  try {
+    const line =
+      new Date().toISOString() + ' ' + kind + ' ' + JSON.stringify(data || {}) + '\n';
+    fs.appendFileSync(path.join(app.getPath('userData'), 'tuck-error.log'), line);
+  } catch (_) {
+    /* logging must never break the app */
+  }
+}
+
+function safeSetPosition(x, y, where) {
+  if (!win || win.isDestroyed()) return false;
+  const nx = Number(x);
+  const ny = Number(y);
+  if (!Number.isFinite(nx) || !Number.isFinite(ny)) {
+    logTuckError('invalid-position', { where: where || 'unknown', x, y });
+    return false;
+  }
+  try {
+    win.setPosition(Math.round(nx), Math.round(ny));
+    return true;
+  } catch (error) {
+    logTuckError('set-position-failed', {
+      where: where || 'unknown',
+      x: nx,
+      y: ny,
+      error: String(error && error.message ? error.message : error)
+    });
+    return false;
+  }
+}
+
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
@@ -315,7 +347,7 @@ function createWidget() {
       else if (Math.abs(b.y + b.height - (wa.y + wa.height)) < SNAP_DISTANCE) {
         ny = wa.y + wa.height - b.height;
       }
-      if (nx !== b.x || ny !== b.y) win.setPosition(nx, ny);
+      if (nx !== b.x || ny !== b.y) safeSetPosition(nx, ny, 'snap');
       cfg = store.save({ bounds: { x: nx, y: ny } });
       tuck.expanded = { x: nx, y: ny };
       tuck.lastInside = Date.now();
@@ -340,7 +372,7 @@ function showWidget(focus) {
   if (tuck.collapsed) {
     tuck.collapsed = false;
     tuck.lastInside = Date.now();
-    if (tuck.expanded) win.setPosition(tuck.expanded.x, tuck.expanded.y);
+    if (tuck.expanded) safeSetPosition(tuck.expanded.x, tuck.expanded.y, 'show-widget');
     sendTuckState();
   }
   win.show();
@@ -364,12 +396,39 @@ function sendTuckState() {
 }
 
 function animateWindow(target, done) {
+  const finish = (ok) => {
+    if (done) done(ok);
+  };
   if (!win || win.isDestroyed()) {
-    if (done) done();
+    finish(false);
     return;
   }
+
+  const targetX = Number(target && target.x);
+  const targetY = Number(target && target.y);
+  if (!Number.isFinite(targetX) || !Number.isFinite(targetY)) {
+    logTuckError('invalid-target', { target });
+    finish(false);
+    return;
+  }
+
+  let from;
+  try {
+    from = win.getBounds();
+  } catch (error) {
+    logTuckError('get-bounds-failed', { error: String(error) });
+    finish(false);
+    return;
+  }
+  const fromX = Number(from && from.x);
+  const fromY = Number(from && from.y);
+  if (!Number.isFinite(fromX) || !Number.isFinite(fromY)) {
+    logTuckError('invalid-from', { from });
+    finish(false);
+    return;
+  }
+
   if (tuckAnim) clearInterval(tuckAnim);
-  const from = win.getBounds();
   const started = Date.now();
   suppressBoundsUntil = started + TUCK_DURATION + 320;
   tuck.moving = true;
@@ -378,19 +437,26 @@ function animateWindow(target, done) {
       clearInterval(tuckAnim);
       tuckAnim = null;
       tuck.moving = false;
+      finish(false);
       return;
     }
     const t = Math.min(1, (Date.now() - started) / TUCK_DURATION);
     const eased = 1 - Math.pow(1 - t, 3);
-    const x = Math.round(from.x + (target.x - from.x) * eased);
-    const y = Math.round(from.y + (target.y - from.y) * eased);
-    win.setPosition(x, y);
+    const x = Math.round(fromX + (targetX - fromX) * eased);
+    const y = Math.round(fromY + (targetY - fromY) * eased);
+    if (!safeSetPosition(x, y, 'animate')) {
+      clearInterval(tuckAnim);
+      tuckAnim = null;
+      tuck.moving = false;
+      finish(false);
+      return;
+    }
     if (t >= 1) {
       clearInterval(tuckAnim);
       tuckAnim = null;
       tuck.moving = false;
       suppressBoundsUntil = Date.now() + 150;
-      if (done) done();
+      finish(true);
     }
   }, 16);
 }
@@ -399,8 +465,17 @@ function tuckCollapse(force) {
   if (!cfg || !cfg.autoTuck || !win || win.isDestroyed() || !win.isVisible()) return;
   if (tuck.collapsed || tuck.moving) return;
   if (!force && tuckPaused) return;
-  const b = win.getBounds();
-  const wa = screen.getDisplayMatching(b).workArea;
+
+  let b;
+  let wa;
+  try {
+    b = win.getBounds();
+    wa = screen.getDisplayMatching(b).workArea;
+  } catch (error) {
+    logTuckError('collapse-bounds-failed', { error: String(error) });
+    return;
+  }
+
   const center = b.x + b.width / 2;
   const side = center < wa.x + wa.width / 2 ? 'left' : 'right';
   const y = clamp(b.y, wa.y, wa.y + wa.height - b.height);
@@ -409,33 +484,73 @@ function tuckCollapse(force) {
       ? wa.x + wa.width - TUCK_VISIBLE
       : wa.x - b.width + TUCK_VISIBLE;
 
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    logTuckError('invalid-collapse-target', { x, y, b, wa });
+    return;
+  }
+
   tuck.expanded = { x: b.x, y: b.y };
   tuck.side = side;
   tuck.collapsed = true;
   sendTuckState();
   refreshMenus();
-  animateWindow({ x, y });
+  animateWindow({ x, y }, (ok) => {
+    if (ok) return;
+    tuck.collapsed = false;
+    sendTuckState();
+    refreshMenus();
+    if (tuck.expanded) {
+      safeSetPosition(tuck.expanded.x, tuck.expanded.y, 'collapse-fallback');
+    }
+  });
 }
 
 function tuckExpand() {
   if (!win || win.isDestroyed() || !tuck.collapsed) return;
   const fallback = defaultPosition();
-  const base = tuck.expanded || fallback;
-  const wa = screen.getDisplayMatching({
-    x: base.x,
-    y: base.y,
-    width: WIDGET_WIDTH,
-    height: WIDGET_HEIGHT
-  }).workArea;
+  let base = fallback;
+  if (
+    tuck.expanded &&
+    Number.isFinite(Number(tuck.expanded.x)) &&
+    Number.isFinite(Number(tuck.expanded.y))
+  ) {
+    base = tuck.expanded;
+  } else if (tuck.expanded) {
+    logTuckError('invalid-expanded-bounds', { expanded: tuck.expanded });
+  }
+
+  let wa;
+  try {
+    wa = screen.getDisplayMatching({
+      x: Number(base.x),
+      y: Number(base.y),
+      width: WIDGET_WIDTH,
+      height: WIDGET_HEIGHT
+    }).workArea;
+  } catch (error) {
+    logTuckError('expand-bounds-failed', { error: String(error) });
+    return;
+  }
+
   const target = {
-    x: clamp(base.x, wa.x, wa.x + wa.width - WIDGET_WIDTH),
-    y: clamp(base.y, wa.y, wa.y + wa.height - WIDGET_HEIGHT)
+    x: clamp(Number(base.x), wa.x, wa.x + wa.width - WIDGET_WIDTH),
+    y: clamp(Number(base.y), wa.y, wa.y + wa.height - WIDGET_HEIGHT)
   };
+  if (!Number.isFinite(target.x) || !Number.isFinite(target.y)) {
+    logTuckError('invalid-expand-target', { target, base, wa });
+    return;
+  }
+
   tuck.collapsed = false;
   tuck.lastInside = Date.now();
   sendTuckState();
   refreshMenus();
-  animateWindow(target);
+  animateWindow(target, (ok) => {
+    if (ok) return;
+    tuck.collapsed = true;
+    sendTuckState();
+    refreshMenus();
+  });
 }
 
 function tuckTick() {
@@ -823,7 +938,7 @@ app.whenReady().then(() => {
     if (win && !win.isDestroyed() && !win.isVisible()) return;
     if (win && !win.isDestroyed() && !isOnScreen(win.getBounds())) {
       const pos = defaultPosition();
-      win.setPosition(pos.x, pos.y);
+      safeSetPosition(pos.x, pos.y, 'display-change');
       cfg = store.save({ bounds: pos });
     }
   });

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2b34"/>
+      <stop offset="1" stop-color="#080d12"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe9b3"/>
+      <stop offset="0.5" stop-color="#ddb15d"/>
+      <stop offset="1" stop-color="#ad7728"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#plate)"/>
+  <rect x="5" y="5" width="118" height="118" rx="29" fill="none" stroke="#2d3f49" stroke-width="2"/>
+  <text
+    x="64"
+    y="68"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="72"
+    font-weight="700"
+    fill="url(#gold)"
+  >¥</text>
+</svg>

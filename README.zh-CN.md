@@ -2,7 +2,7 @@
   <img src="docs/hero-zh.png" alt="到点 — 你的工作日，按秒计价" width="100%">
 </p>
 
-<h1 align="center">到点 · Daodian</h1>
+<h1 align="center"><img src="assets/icon.png" width="52" alt="到点图标"> 到点 · Daodian</h1>
 
 <p align="center">
   <b>你的工作日，按秒计价。</b><br>
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.1.0" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.1.1" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -59,8 +59,8 @@
 
 | 版本 | 文件 | 说明 |
 | --- | --- | --- |
-| 安装包 | [Daodian-0.1.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.0/Daodian-0.1.0-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
-| 便携版 | [Daodian-0.1.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.0/Daodian-0.1.0-Portable.exe) | 单文件，免安装 |
+| 安装包 | [Daodian-0.1.1-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.1/Daodian-0.1.1-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
+| 便携版 | [Daodian-0.1.1-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.1.1/Daodian-0.1.1-Portable.exe) | 单文件，免安装 |
 
 [全部版本](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -147,8 +147,8 @@ npm run dist     # 同时构建安装包和便携版
 输出：
 
 ```text
-dist/Daodian-0.1.0-Setup.exe
-dist/Daodian-0.1.0-Portable.exe
+dist/Daodian-0.1.1-Setup.exe
+dist/Daodian-0.1.1-Portable.exe
 ```
 
 Electron 或 NSIS 下载慢的话，可以先设镜像：

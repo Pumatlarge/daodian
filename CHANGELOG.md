@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.1 — 2026-11-12
+
+A small but important follow-up to the first release.
+
+### Fixed
+
+- Prevented an uncaught main-process exception from the edge auto-tuck animation when the window is closing or the display changes. Coordinates are now validated, `setPosition` is guarded, and failures are written to `tuck-error.log` instead of showing the Electron error dialog.
+
+### Changed
+
+- Redesigned the app and installer icon: a dark plate with a gold progress ring and a centered ¥ mark. The tray icon uses a simplified high-contrast mark for 16/32 px.
+- The app icon is now generated from vector sources in `assets/icon.svg` and `assets/tray.svg`.
+
 ## 0.1.0 — 2026-11-12
 
 The first public release.

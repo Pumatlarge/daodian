@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2b34"/>
+      <stop offset="0.55" stop-color="#111b22"/>
+      <stop offset="1" stop-color="#080d12"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe9b3"/>
+      <stop offset="0.5" stop-color="#ddb15d"/>
+      <stop offset="1" stop-color="#ad7728"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="0.26" cy="0.16" r="0.85">
+      <stop offset="0" stop-color="#8fe6ff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#8fe6ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#plate)"/>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#sheen)"/>
+  <rect x="17" y="17" width="478" height="478" rx="115" fill="none" stroke="#2d3f49" stroke-width="2"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="26"/>
+  <circle
+    cx="256"
+    cy="256"
+    r="150"
+    fill="none"
+    stroke="url(#gold)"
+    stroke-width="26"
+    stroke-linecap="round"
+    stroke-dasharray="706.858 942.478"
+    transform="rotate(-90 256 256)"
+  />
+  <text
+    x="256"
+    y="264"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="150"
+    font-weight="650"
+    fill="url(#gold)"
+  >¥</text>
+</svg>
