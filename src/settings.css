@@ -396,6 +396,12 @@ input.invalid {
   flex-wrap: wrap;
 }
 
+.about-github {
+  margin-top: 14px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
 .switch .txt b {
   font-weight: 550;
   font-size: 13px;

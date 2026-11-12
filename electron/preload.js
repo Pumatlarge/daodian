@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('api', {
   toggleVisibility: () => ipcRenderer.invoke('window:toggle'),
   hide: () => ipcRenderer.invoke('window:hide'),
   openDataDir: () => ipcRenderer.invoke('data:open'),
+  openRepository: () => ipcRenderer.invoke('link:repo'),
   quit: () => ipcRenderer.invoke('app:quit'),
   togglePrivacy: () => ipcRenderer.invoke('privacy:toggle')
 });

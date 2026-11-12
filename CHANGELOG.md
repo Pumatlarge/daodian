@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.5 — 2026-11-12
+
+### Added
+
+- Settings → About & updates now includes a **GitHub project home** row showing `github.com/Pumatlarge/daodian`, with an “Open GitHub” button that opens the repository in the default browser (source, changelog and issue tracker).
+
 ## 0.2.4 — 2026-11-12
 
 ### Changed

@@ -38,6 +38,7 @@ const TUCK_MIN_WIDTH = 32;
 const TUCK_DURATION = 200;
 const UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
 const RELEASES_URL = 'https://github.com/Pumatlarge/daodian/releases/latest';
+const REPO_URL = 'https://github.com/Pumatlarge/daodian';
 
 let cfg = null;
 let win = null;
@@ -1166,6 +1167,11 @@ function registerIpc() {
 
   ipcMain.handle('data:open', () => {
     shell.openPath(app.getPath('userData'));
+    return true;
+  });
+
+  ipcMain.handle('link:repo', () => {
+    shell.openExternal(REPO_URL);
     return true;
   });
 

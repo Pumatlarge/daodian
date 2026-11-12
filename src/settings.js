@@ -477,6 +477,10 @@ function bind() {
     bridge.installUpdate();
   });
 
+  $('btnGithub').addEventListener('click', () => {
+    bridge.openRepository();
+  });
+
   bridge.onUpdate((info) => {
     updateState = info;
     renderUpdate();

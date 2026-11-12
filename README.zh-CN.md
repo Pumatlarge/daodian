@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.2.4" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.2.5" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -60,8 +60,8 @@
 
 | 版本 | 文件 | 说明 |
 | --- | --- | --- |
-| 安装包 | [Daodian-0.2.4-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.4/Daodian-0.2.4-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
-| 便携版 | [Daodian-0.2.4-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.4/Daodian-0.2.4-Portable.exe) | 单文件，免安装 |
+| 安装包 | [Daodian-0.2.5-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.5/Daodian-0.2.5-Setup.exe) | 当前用户安装，可选目录，创建桌面 / 开始菜单快捷方式 |
+| 便携版 | [Daodian-0.2.5-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.5/Daodian-0.2.5-Portable.exe) | 单文件，免安装 |
 
 [全部版本](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -110,7 +110,7 @@
 - 每套皮肤的强调色、背景图、圆角、字体；全局字号和透明度。
 - 显示项：目标、百分比、剩余时间、时薪、加班时薪条、隐私模式。
 - 置顶、开机自启、到点通知、音效、边缘自动收纳和延迟。
-- 自动更新开关、当前版本、检查更新、安装更新。
+- 自动更新开关、当前版本、检查更新、安装更新，以及 GitHub 项目主页链接。
 
 ## 操作
 
@@ -151,10 +151,10 @@ npm run dist     # 同时构建安装包和便携版
 输出：
 
 ```text
-dist/Daodian-0.2.4-Setup.exe
-dist/Daodian-0.2.4-Setup.exe.blockmap
+dist/Daodian-0.2.5-Setup.exe
+dist/Daodian-0.2.5-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.2.4-Portable.exe
+dist/Daodian-0.2.5-Portable.exe
 ```
 
 Electron 或 NSIS 下载慢的话，可以先设镜像：

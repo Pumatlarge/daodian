@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="36" viewBox="0 0 200 36" role="img" aria-label="version 0.1.0">
   <rect x="1" y="1" width="198" height="34" rx="7" fill="#0f172a" stroke="#263649"/>
   <text x="14" y="19" dominant-baseline="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#8fa2a7">version</text>
-  <text x="186" y="19" text-anchor="end" dominant-baseline="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#e2bb73">0.2.4</text>
+  <text x="186" y="19" text-anchor="end" dominant-baseline="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#e2bb73">0.2.5</text>
 </svg>
