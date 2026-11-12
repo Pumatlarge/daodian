@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1 — 2026-11-12
+
+### Fixed
+
+- Edge auto-tuck no longer collapses into the inner boundary between two monitors, which could hide the window under the adjacent display and make the handle impossible to pull out.
+- Only the visible 16 × 64 px handle counts as the hover target while tucked, so the transparent part of the window extending over another monitor can no longer trigger an expand/collapse loop.
+- If a display has neighbors on both sides, auto-tuck stays expanded instead of hiding where it cannot be reached.
+- When a tuck has to switch to the outer edge of the current display, the expanded position follows that edge so the handle can always be pulled out.
+- The edge handle is now a centered 64 px handle instead of a full-height bar.
+
 ## 0.2.0 — 2026-11-12
 
 ### Added

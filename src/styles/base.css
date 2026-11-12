@@ -293,8 +293,10 @@ body {
 
 .tuck-tab {
   position: absolute;
-  top: 14px;
-  bottom: 14px;
+  top: 50%;
+  bottom: auto;
+  height: 64px;
+  transform: translateY(-50%);
   width: 16px;
   display: none;
   align-items: center;
@@ -342,8 +344,8 @@ body {
 .tuck-tab::before {
   content: "";
   position: absolute;
-  top: 10px;
-  bottom: 10px;
+  top: 8px;
+  bottom: 8px;
   width: 3px;
   border-radius: 3px;
   background: var(--accent, #d18957);

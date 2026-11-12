@@ -33,6 +33,8 @@ const WIDGET_HEIGHT = 190;
 const EDGE_MARGIN = 24;
 const SNAP_DISTANCE = 20;
 const TUCK_VISIBLE = 16;
+const TUCK_TAB_HEIGHT = 64;
+const TUCK_HIT_PADDING = 6;
 const TUCK_DURATION = 200;
 const UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
 const RELEASES_URL = 'https://github.com/Pumatlarge/daodian/releases/latest';
@@ -75,6 +77,30 @@ const tuck = {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function overlapsVertically(a, b) {
+  return a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
+function hasNeighborDisplay(wa, side, windowBounds) {
+  const tolerance = 24;
+  return screen.getAllDisplays().some((display) => {
+    const workArea = display.workArea;
+    if (
+      workArea.x === wa.x &&
+      workArea.y === wa.y &&
+      workArea.width === wa.width &&
+      workArea.height === wa.height
+    ) {
+      return false;
+    }
+    if (!overlapsVertically(workArea, windowBounds)) return false;
+    if (side === 'right') {
+      return Math.abs(workArea.x - (wa.x + wa.width)) <= tolerance;
+    }
+    return Math.abs(workArea.x + workArea.width - wa.x) <= tolerance;
+  });
 }
 
 function logTuckError(kind, data) {
@@ -672,7 +698,19 @@ function tuckCollapse(force) {
   }
 
   const center = b.x + b.width / 2;
-  const side = center < wa.x + wa.width / 2 ? 'left' : 'right';
+  let side = center < wa.x + wa.width / 2 ? 'left' : 'right';
+  let movedToOuter = false;
+
+  if (hasNeighborDisplay(wa, side, b)) {
+    const opposite = side === 'left' ? 'right' : 'left';
+    if (hasNeighborDisplay(wa, opposite, b)) {
+      logTuckError('no-outer-edge', { side, b, wa });
+      return;
+    }
+    side = opposite;
+    movedToOuter = true;
+  }
+
   const y = clamp(b.y, wa.y, wa.y + wa.height - b.height);
   const x =
     side === 'right'
@@ -684,7 +722,13 @@ function tuckCollapse(force) {
     return;
   }
 
-  tuck.expanded = { x: b.x, y: b.y };
+  const expandedY = clamp(b.y, wa.y, wa.y + wa.height - b.height);
+  tuck.expanded = movedToOuter
+    ? {
+        x: side === 'left' ? wa.x : wa.x + wa.width - b.width,
+        y: expandedY
+      }
+    : { x: b.x, y: b.y };
   tuck.side = side;
   tuck.collapsed = true;
   sendTuckState();
@@ -755,11 +799,22 @@ function tuckTick() {
 
   const point = screen.getCursorScreenPoint();
   const b = win.getBounds();
-  const inside =
-    point.x >= b.x &&
-    point.x < b.x + b.width &&
-    point.y >= b.y &&
-    point.y < b.y + b.height;
+  let inside;
+  if (tuck.collapsed) {
+    const stripLeft = tuck.side === 'right' ? b.x : b.x + b.width - TUCK_VISIBLE;
+    const tabTop = b.y + (b.height - TUCK_TAB_HEIGHT) / 2;
+    inside =
+      point.x >= stripLeft &&
+      point.x < stripLeft + TUCK_VISIBLE &&
+      point.y >= tabTop - TUCK_HIT_PADDING &&
+      point.y < tabTop + TUCK_TAB_HEIGHT + TUCK_HIT_PADDING;
+  } else {
+    inside =
+      point.x >= b.x &&
+      point.x < b.x + b.width &&
+      point.y >= b.y &&
+      point.y < b.y + b.height;
+  }
 
   if (inside) {
     tuck.lastInside = Date.now();

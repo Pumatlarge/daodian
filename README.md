@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="version 0.2.0" src="docs/badges/version.svg" height="28">
+  <img alt="version 0.2.1" src="docs/badges/version.svg" height="28">
   <img alt="Windows 10 / 11" src="docs/badges/platform.svg" height="28">
   <img alt="MIT" src="docs/badges/license.svg" height="28">
   <img alt="Electron 45" src="docs/badges/electron.svg" height="28">
@@ -60,8 +60,8 @@ Cream Journal by day, Cyber Neon by night — or pick one and lock it. Every ski
 
 | Build | File | Notes |
 | --- | --- | --- |
-| Installer | [Daodian-0.2.0-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.0/Daodian-0.2.0-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
-| Portable | [Daodian-0.2.0-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.0/Daodian-0.2.0-Portable.exe) | Single file, no installation |
+| Installer | [Daodian-0.2.1-Setup.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.1/Daodian-0.2.1-Setup.exe) | Per-user install, choose the folder, desktop / Start menu shortcuts |
+| Portable | [Daodian-0.2.1-Portable.exe](https://github.com/Pumatlarge/daodian/releases/download/v0.2.1/Daodian-0.2.1-Portable.exe) | Single file, no installation |
 
 [All releases](https://github.com/Pumatlarge/daodian/releases) · Windows 10 / 11 · x64 · Electron 45
 
@@ -151,10 +151,10 @@ npm run dist     # installer + portable build
 Outputs:
 
 ```text
-dist/Daodian-0.2.0-Setup.exe
-dist/Daodian-0.2.0-Setup.exe.blockmap
+dist/Daodian-0.2.1-Setup.exe
+dist/Daodian-0.2.1-Setup.exe.blockmap
 dist/latest.yml
-dist/Daodian-0.2.0-Portable.exe
+dist/Daodian-0.2.1-Portable.exe
 ```
 
 If Electron or NSIS downloads are slow, set the mirrors first:
