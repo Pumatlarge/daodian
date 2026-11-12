@@ -155,7 +155,7 @@ git clone https://github.com/Pumatlarge/daodian.git
 cd daodian
 npm install
 npm start        # run from source
-npm test         # 17 calculation tests
+npm test         # 31 calculation tests
 npm run dist     # installer + portable build
 ```
 
@@ -188,7 +188,7 @@ tools/           icon and documentation image generators
 tests/           calculation tests
 ```
 
-The UI is in Simplified Chinese. The calculation layer is framework-free and covered by `tests/calc.test.js`; an English UI is a welcome contribution.
+The UI ships in Simplified Chinese and English; the language lives in `config.json` and the strings in `shared/i18n.js`. The calculation layer is framework-free and covered by `tests/calc.test.js`. Other locales are a welcome contribution.
 
 ## Releasing
 
@@ -218,7 +218,7 @@ The first updater-enabled build, **0.2.0**, has to be installed manually once. F
 
 - Holiday / 调休 calendar
 - Monthly earnings and monthly progress view
-- English UI and other locales
+- More locales beyond English
 - Click-through mode and hide-on-fullscreen
 - Full theme editor with import/export
 

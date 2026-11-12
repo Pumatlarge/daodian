@@ -155,7 +155,7 @@ git clone https://github.com/Pumatlarge/daodian.git
 cd daodian
 npm install
 npm start        # 从源码运行
-npm test         # 17 个计算测试
+npm test         # 31 个计算测试
 npm run dist     # 同时构建安装包和便携版
 ```
 
@@ -188,7 +188,7 @@ tools/           图标与文档图片生成脚本
 tests/           计算测试
 ```
 
-界面目前是简体中文；计算层不依赖 DOM / Electron，欢迎补英文界面。
+界面提供简体中文和英文，语言保存在 `config.json`，文案在 `shared/i18n.js`；计算层不依赖 DOM / Electron，欢迎补其他语言。
 
 ## 发布新版本
 
@@ -218,7 +218,7 @@ Daodian-<version>-Portable.exe   （自动更新不需要，但便携版用户�
 
 - 节假日 / 调休日历
 - 本月累计和月薪进度
-- 英文界面与其他语言
+- 英语之外的其他语言
 - 鼠标穿透、全屏自动隐藏
 - 完整的主题编辑器与导入导出
 
