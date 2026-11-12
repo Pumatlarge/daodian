@@ -18,6 +18,7 @@ const path = require('path');
 const fs = require('fs');
 const store = require('./store');
 const stats = require('./stats');
+const i18n = require('../shared/i18n');
 const { isoDate, timeLabel, isWorkday } = require('../shared/calc');
 const { effectiveTheme } = require('./theme');
 const THEMES = require('../shared/themes');
@@ -135,6 +136,26 @@ function asset(name) {
 
 function preload() {
   return path.join(__dirname, 'preload.js');
+}
+
+function tr(zh, vars) {
+  return i18n.t(cfg && cfg.language, zh, vars);
+}
+
+function applyLanguage() {
+  const lang = cfg ? cfg.language : 'zh';
+  if (win && !win.isDestroyed()) win.setTitle(i18n.t(lang, '到点'));
+  if (settingsWin && !settingsWin.isDestroyed()) {
+    settingsWin.setTitle(i18n.t(lang, '到点 · 设置'));
+  }
+  if (statsWin && !statsWin.isDestroyed()) {
+    statsWin.setTitle(i18n.t(lang, '到点 · 工作统计'));
+  }
+  if (setupWin && !setupWin.isDestroyed()) {
+    setupWin.setTitle(i18n.t(lang, '到点 · 第一次设置'));
+  }
+  if (tray) tray.setToolTip(i18n.t(lang, '到点 · 今日已赚'));
+  refreshMenus();
 }
 
 function allWindows() {
@@ -270,8 +291,8 @@ function setupUpdater() {
       updateNotifiedVersion = info.version;
       try {
         new Notification({
-          title: '到点 · 新版本已就绪',
-          body: 'v' + info.version + ' 已下载，可在托盘或设置中确认安装。',
+          title: tr('到点 · 新版本已就绪'),
+          body: tr('v{v} 已下载，可在托盘或设置中确认安装。', { v: info.version }),
           icon: asset('icon.png'),
           silent: true
         }).show();
@@ -347,16 +368,16 @@ async function promptInstallUpdate(version) {
   const parent = win && !win.isDestroyed() && win.isVisible() ? win : undefined;
   const options = {
     type: 'question',
-    buttons: ['现在安装', '稍后'],
+    buttons: [tr('现在安装'), tr('稍后')],
     defaultId: 0,
     cancelId: 1,
     noLink: true,
     icon: nativeImage.createFromPath(asset('icon.png')),
-    title: '到点 · 更新已就绪',
-    message: 'v' + version + ' 已下载完成',
-    detail:
-      '现在安装会关闭到点，并打开安装程序完成更新。' +
-      '选择「稍后」不会自动安装，可以随时从托盘菜单或设置里的按钮安装。'
+    title: tr('到点 · 更新已就绪'),
+    message: tr('v{v} 已下载完成', { v: version }),
+    detail: tr(
+      '现在安装会关闭到点，并打开安装程序完成更新。选择「稍后」不会自动安装，可以随时从托盘菜单或设置里的按钮安装。'
+    )
   };
   let result;
   try {
@@ -389,13 +410,13 @@ function themeSubmenu() {
   const eff = currentTheme();
   return [
     {
-      label: '恢复自动切换',
+      label: tr('恢复自动切换'),
       enabled: !!cfg.themeOverride || cfg.themeMode !== 'time',
       click: () => restoreAutoTheme()
     },
     { type: 'separator' },
     ...THEMES.map((theme) => ({
-      label: theme.name,
+      label: tr(theme.name),
       type: 'radio',
       checked: eff.id === theme.id,
       click: () => applyTheme(theme.id)
@@ -439,11 +460,11 @@ function buildMenu(kind) {
   const visible = win && !win.isDestroyed() && win.isVisible();
   return Menu.buildFromTemplate([
     {
-      label: visible ? '隐藏小组件' : '显示小组件',
+      label: visible ? tr('隐藏小组件') : tr('显示小组件'),
       click: () => toggleWidget()
     },
-    { label: '打开设置…', click: () => openSettings() },
-    { label: '工作统计…', click: () => openStats() },
+    { label: tr('打开设置…'), click: () => openSettings() },
+    { label: tr('工作统计…'), click: () => openStats() },
     ...(function punchMenuItems() {
       if (!cfg) return [];
       const now = new Date();
@@ -452,52 +473,55 @@ function buildMenu(kind) {
       const punched = cfg.punchDate === today && cfg.punchIn != null;
       const ended = punched && cfg.punchOut != null;
       if (!punched) {
-        return [{ label: '打卡上班', click: () => punch('in') }];
+        return [{ label: tr('打卡上班'), click: () => punch('in') }];
       }
       if (!ended) {
         return [
-          { label: '打卡下班', click: () => punch('out') },
-          { label: '撤销今日打卡', click: () => clearPunch() }
+          { label: tr('打卡下班'), click: () => punch('out') },
+          { label: tr('撤销今日打卡'), click: () => clearPunch() }
         ];
       }
       return [
         {
-          label: '今日已打卡 ' + timeLabel(cfg.punchIn) + '–' + timeLabel(cfg.punchOut),
+          label: tr('今日已打卡 {in}–{out}', {
+            in: timeLabel(cfg.punchIn),
+            out: timeLabel(cfg.punchOut)
+          }),
           enabled: false
         },
-        { label: '撤销今日打卡', click: () => clearPunch() }
+        { label: tr('撤销今日打卡'), click: () => clearPunch() }
       ];
     })(),
     { type: 'separator' },
-    { label: '皮肤', submenu: themeSubmenu() },
-    { label: '透明度', submenu: opacitySubmenu() },
+    { label: tr('皮肤'), submenu: themeSubmenu() },
+    { label: tr('透明度'), submenu: opacitySubmenu() },
     {
-      label: '边缘自动收纳',
+      label: tr('边缘自动收纳'),
       type: 'checkbox',
       checked: !!cfg.autoTuck,
       click: () => saveConfig({ autoTuck: !cfg.autoTuck })
     },
     {
-      label: '现在收纳到边缘',
+      label: tr('现在收纳到边缘'),
       visible: !!cfg.autoTuck,
       enabled: !!(win && win.isVisible() && !tuck.collapsed),
       click: () => tuckCollapse(true)
     },
     {
-      label: '隐私模式',
+      label: tr('隐私模式'),
       type: 'checkbox',
       checked: !!cfg.privacy,
       click: () => saveConfig({ privacy: !cfg.privacy })
     },
     { type: 'separator' },
     {
-      label: isPortable ? '下载新版本…' : '检查更新…',
+      label: isPortable ? tr('下载新版本…') : tr('检查更新…'),
       click: () => checkForUpdates(true)
     },
     ...(pendingVersion
       ? [
           {
-            label: '安装更新 v' + pendingVersion,
+            label: tr('安装更新 v{v}', { v: pendingVersion }),
             click: () => installUpdate()
           }
         ]
@@ -505,26 +529,26 @@ function buildMenu(kind) {
     ...(updateState.status === 'downloading'
       ? [
           {
-            label: '正在下载更新 ' + updateState.percent + '%',
+            label: tr('正在下载更新 {p}%', { p: updateState.percent }),
             enabled: false
           }
         ]
       : []),
     { type: 'separator' },
     {
-      label: '窗口置顶',
+      label: tr('窗口置顶'),
       type: 'checkbox',
       checked: !!cfg.alwaysOnTop,
       click: () => saveConfig({ alwaysOnTop: !cfg.alwaysOnTop })
     },
     {
-      label: '开机自启',
+      label: tr('开机自启'),
       type: 'checkbox',
       checked: !!cfg.autostart,
       click: () => saveConfig({ autostart: !cfg.autostart })
     },
     { type: 'separator' },
-    { label: '退出到点', click: () => quitApp() }
+    { label: tr('退出到点'), click: () => quitApp() }
   ]);
 }
 
@@ -534,7 +558,7 @@ function createTray() {
     icon = nativeImage.createFromPath(asset('icon.png'));
   }
   tray = new Tray(icon);
-  tray.setToolTip('到点 · 今日已赚');
+  tray.setToolTip(tr('到点 · 今日已赚'));
   tray.on('click', () => toggleWidget());
   refreshMenus();
 }
@@ -583,7 +607,7 @@ function createWidget() {
     alwaysOnTop: !!cfg.alwaysOnTop,
     hasShadow: false,
     show: false,
-    title: '到点',
+    title: tr('到点'),
     icon: asset('icon.png'),
     webPreferences: {
       preload: preload(),
@@ -944,7 +968,15 @@ function applyAutostart(enabled) {
 
 function saveConfig(patch, exceptWebContents) {
   const wasOnboarded = cfg.onboarded;
+  const previousLanguage = cfg.language;
   cfg = store.save(patch);
+  if (
+    patch &&
+    Object.prototype.hasOwnProperty.call(patch, 'language') &&
+    cfg.language !== previousLanguage
+  ) {
+    applyLanguage();
+  }
   applyWindowFlags(patch);
   if (patch && Object.prototype.hasOwnProperty.call(patch, 'autostart')) {
     applyAutostart(cfg.autostart);
@@ -1010,7 +1042,7 @@ function openSettings() {
     height: Math.min(780, Math.max(560, workArea.height - 80)),
     minWidth: 620,
     minHeight: 520,
-    title: '到点 · 设置',
+    title: tr('到点 · 设置'),
     icon: asset('icon.png'),
     backgroundColor: '#f3ede2',
     autoHideMenuBar: true,
@@ -1050,7 +1082,7 @@ function openStats() {
     height: Math.min(860, Math.max(620, workArea.height - 60)),
     minWidth: 760,
     minHeight: 580,
-    title: '到点 · 工作统计',
+    title: tr('到点 · 工作统计'),
     icon: asset('icon.png'),
     backgroundColor: '#f2ebdf',
     autoHideMenuBar: true,
@@ -1085,7 +1117,7 @@ function showSetup() {
     height: Math.min(800, Math.max(560, workArea.height - 60)),
     minWidth: 600,
     minHeight: 520,
-    title: '到点 · 第一次设置',
+    title: tr('到点 · 第一次设置'),
     icon: asset('icon.png'),
     backgroundColor: '#f3ede2',
     autoHideMenuBar: true,
@@ -1185,6 +1217,7 @@ function registerIpc() {
   ipcMain.handle('setup:finish', (event, patch) => {
     const safe = patch && typeof patch === 'object' ? patch : {};
     cfg = store.save({ ...safe, onboarded: true });
+    applyLanguage();
     broadcastConfig();
     broadcastTheme();
     refreshMenus();
@@ -1204,10 +1237,10 @@ function registerIpc() {
   ipcMain.handle('dialog:image', async (event) => {
     const parent = BrowserWindow.fromWebContents(event.sender) || undefined;
     const result = await dialog.showOpenDialog(parent, {
-      title: '选择背景图片',
+      title: tr('选择背景图片'),
       properties: ['openFile'],
       filters: [
-        { name: '图片', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'] }
+        { name: tr('图片'), extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'] }
       ]
     });
     if (result.canceled || !result.filePaths.length) return null;
@@ -1215,7 +1248,7 @@ function registerIpc() {
     try {
       const stat = fs.statSync(src);
       if (stat.size > 16 * 1024 * 1024) {
-        return { error: '图片超过 16MB，换一张小一点的吧' };
+        return { error: tr('图片超过 16MB，换一张小一点的吧') };
       }
       const ext = path.extname(src).toLowerCase() || '.png';
       const dir = path.join(app.getPath('userData'), 'assets');
@@ -1223,10 +1256,10 @@ function registerIpc() {
       const dest = path.join(dir, 'bg-' + Date.now() + ext);
       fs.copyFileSync(src, dest);
       const dataUrl = imageData(dest);
-      if (!dataUrl) return { error: '这张图片读不出来' };
+      if (!dataUrl) return { error: tr('这张图片读不出来') };
       return { path: dest, dataUrl };
     } catch (e) {
-      return { error: '复制图片失败：' + e.message };
+      return { error: tr('复制图片失败：') + e.message };
     }
   });
 
@@ -1234,7 +1267,7 @@ function registerIpc() {
 
   ipcMain.handle('notify', (event, payload) => {
     if (!Notification.isSupported()) return false;
-    const title = String(payload && payload.title ? payload.title : '到点');
+    const title = String(payload && payload.title ? payload.title : tr('到点'));
     const body = String(payload && payload.body ? payload.body : '');
     try {
       new Notification({
@@ -1251,7 +1284,7 @@ function registerIpc() {
 
   ipcMain.on('summary:update', (event, text) => {
     lastSummary = typeof text === 'string' ? text : '';
-    if (tray) tray.setToolTip(lastSummary || '到点');
+    if (tray) tray.setToolTip(lastSummary || tr('到点'));
   });
 
   ipcMain.handle('window:toggle', () => {

@@ -9,13 +9,21 @@
   <body class="setup">
     <div class="setup-shell">
       <header class="head">
-        <div class="eyebrow">第一次见面</div>
-        <h1>先认识一下你的工资</h1>
-        <p class="sub">填完这三步，“到点”就会在桌面替你数钱。所有数据只留在本机。</p>
-        <div class="steps">
-          <span class="step active" data-step="1">1</span>
-          <span class="step" data-step="2">2</span>
-          <span class="step" data-step="3">3</span>
+        <div>
+          <div class="eyebrow">第一次见面</div>
+          <h1>先认识一下你的工资</h1>
+          <p class="sub">填完这三步，“到点”就会在桌面替你数钱。所有数据只留在本机。</p>
+          <div class="steps">
+            <span class="step active" data-step="1">1</span>
+            <span class="step" data-step="2">2</span>
+            <span class="step" data-step="3">3</span>
+          </div>
+        </div>
+        <div class="head-actions">
+          <div class="lang-switch" id="langSwitch">
+            <button type="button" data-lang="zh">中文</button>
+            <button type="button" data-lang="en">English</button>
+          </div>
         </div>
       </header>
 
@@ -38,7 +46,7 @@
               </div>
             </label>
             <label class="field">
-              <span>工作日</span>
+              <span>工作日模式</span>
               <select id="sPattern">
                 <option value="five_two">固定双休（周一至周五）</option>
                 <option value="big_small">大小周</option>
@@ -135,6 +143,7 @@
 
     <script src="../shared/calc.js"></script>
     <script src="../shared/themes.js"></script>
+    <script src="../shared/i18n.js"></script>
     <script src="setup.js"></script>
   </body>
 </html>

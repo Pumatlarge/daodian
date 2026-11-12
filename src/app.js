@@ -10,6 +10,11 @@ const {
 } = window.DaodianCalc;
 const THEMES = window.THEMES;
 const bridge = window.api;
+const { t: translate } = window.DaodianI18n;
+
+function tr(zh, vars) {
+  return translate(cfg ? cfg.language : 'zh', zh, vars);
+}
 
 const app = document.getElementById('app');
 const widget = document.getElementById('widget');
@@ -102,20 +107,21 @@ function updateEye() {
   if (!btnEye) return;
   btnEye.innerHTML = cfg && cfg.privacy ? ICON_EYE_OFF : ICON_EYE;
   btnEye.classList.toggle('active', !!(cfg && cfg.privacy));
+  btnEye.title = tr('隐私模式');
 }
 
 function updateTuckButton() {
   if (!btnTuck) return;
   const on = !!(cfg && cfg.autoTuck);
   btnTuck.classList.toggle('on', on);
-  btnTuck.title = on ? '关闭边缘自动收纳' : '自动收纳到边缘';
+  btnTuck.title = on ? tr('关闭边缘自动收纳') : tr('自动收纳到边缘');
 }
 
 function applyUpdateInfo(info) {
   if (!btnSettings) return;
   const ready = !!info && info.status === 'downloaded';
   btnSettings.classList.toggle('has-update', ready);
-  btnSettings.title = ready ? '设置（有新版本待安装）' : '设置';
+  btnSettings.title = ready ? tr('设置（有新版本待安装）') : tr('设置');
 }
 
 function setTuckUi(payload) {
@@ -165,9 +171,9 @@ function topRow(theme) {
     <div class="top">
       <div class="brand">
         ${theme.mascot === 'pixel' ? PIXEL_ART : ''}
-        <span class="brand-dot"></span>到点
+        <span class="brand-dot"></span>${tr('到点')}
       </div>
-      <div class="pill" data-el="pill">工作中</div>
+      <div class="pill" data-el="pill">${tr('工作中')}</div>
     </div>`;
 }
 
@@ -175,7 +181,7 @@ function barTemplate(theme) {
   return `
     ${topRow(theme)}
     <div class="body">
-      <div class="label" data-el="label">今日已赚</div>
+      <div class="label" data-el="label">${tr('今日已赚')}</div>
       <div class="amount-row">
         <span class="amount" data-el="amount">¥0.00</span>
         <span class="target" data-el="target">/ ¥0.00</span>
@@ -184,7 +190,7 @@ function barTemplate(theme) {
       <div class="bar"><i data-el="barFill"></i></div>
       <div class="ot-strip" data-el="otStrip">
         <div class="ot-row">
-          <span data-el="effLabel">实际时薪</span>
+          <span data-el="effLabel">${tr('实际时薪')}</span>
           <b data-el="effRate">¥0.00</b>
           <em data-el="effDelta"></em>
         </div>
@@ -203,16 +209,16 @@ function jarTemplate(theme) {
     ${topRow(theme)}
     <div class="jar-row">
       <div class="jar-main">
-        <div class="label" data-el="label">今日已赚</div>
+        <div class="label" data-el="label">${tr('今日已赚')}</div>
         <div class="amount-row">
           <span class="amount" data-el="amount">¥0.00</span>
         </div>
         <div class="goal">
-          <span data-el="target">目标 ¥0.00</span>
+          <span data-el="target">${tr('目标 {m}', { m: '¥0.00' })}</span>
           <span class="pct" data-el="pct">0%</span>
         </div>
         <div class="ot-mini" data-el="otStrip">
-          <span data-el="effLabel">实际时薪</span>
+          <span data-el="effLabel">${tr('实际时薪')}</span>
           <b data-el="effRate">¥0.00</b>
           <em data-el="effDelta"></em>
         </div>
@@ -228,15 +234,15 @@ function jarTemplate(theme) {
 function receiptTemplate() {
   return `
     <div class="rtop">
-      <span>到点 · 今日工资单</span>
-      <span class="pill" data-el="pill">工作中</span>
+      <span>${tr('到点 · 今日工资单')}</span>
+      <span class="pill" data-el="pill">${tr('工作中')}</span>
     </div>
     <div class="rdash"></div>
-    <div class="rline"><span>今日已赚</span><i class="dots"></i><b data-el="amount">¥0.00</b></div>
-    <div class="rline" data-el="targetRow"><span>今日目标</span><i class="dots"></i><span data-el="target">¥0.00</span></div>
+    <div class="rline"><span>${tr('今日已赚')}</span><i class="dots"></i><b data-el="amount">¥0.00</b></div>
+    <div class="rline" data-el="targetRow"><span>${tr('今日目标')}</span><i class="dots"></i><span data-el="target">¥0.00</span></div>
     <div class="rbar"><i data-el="barFill"></i></div>
     <div class="ot-line" data-el="otStrip">
-      <span data-el="effLabel">实际时薪</span>
+      <span data-el="effLabel">${tr('实际时薪')}</span>
       <b data-el="effRate">¥0.00</b>
       <em data-el="effDelta"></em>
     </div>
@@ -275,37 +281,66 @@ function transitionBuild() {
 }
 
 function pillText(s) {
-  if (s.phase === 'rest') return '休息日';
-  if (s.phase === 'before') return '未上班';
-  if (s.phase === 'lunch') return '午休中';
-  if (s.phase === 'done') return '已下班';
-  if (s.phase === 'overtime') return s.overtimeSec < 60 ? '已下班' : '加班中';
-  if (s.punched && s.punchIn != null) return '工作中 · ' + timeLabel(s.punchIn);
-  return '工作中';
+  if (s.phase === 'rest') return tr('休息日');
+  if (s.phase === 'before') return tr('未上班');
+  if (s.phase === 'lunch') return tr('午休中');
+  if (s.phase === 'done') return tr('已下班');
+  if (s.phase === 'overtime') return s.overtimeSec < 60 ? tr('已下班') : tr('加班中');
+  if (s.punched && s.punchIn != null) {
+    return tr('工作中 · {t}', { t: timeLabel(s.punchIn) });
+  }
+  return tr('工作中');
+}
+
+function nextShiftLabel(label) {
+  const parts = String(label || '').split(' ');
+  if (!parts.length) return label;
+  const day = parts.shift();
+  parts.unshift(tr(day));
+  return parts.join(' ');
 }
 
 function footLeft(s) {
   if (s.phase === 'rest') {
-    return s.nextWorkday ? '下次上班 ' + s.nextWorkday.label : '好好休息';
+    return s.nextWorkday
+      ? tr('下次上班 {label}', { label: nextShiftLabel(s.nextWorkday.label) })
+      : tr('好好休息');
   }
   if (s.phase === 'done') {
-    if (s.punchIn == null) return '今日已下班';
-    let text = '上班 ' + timeLabel(s.punchIn);
-    if (s.punchOut != null) text += ' · 下班 ' + timeLabel(s.punchOut);
-    if (s.overtimeSec >= 60) {
-      text += ' · 加班 ' + formatOvertime(s.overtimeSec);
-    } else if (s.punchOut != null && s.punchOut < s.endM) {
-      text += ' · 早退 ' + formatDuration((s.endM - s.punchOut) * 60);
+    if (s.punchIn == null) return tr('今日已下班');
+    if (s.punchOut == null) {
+      return tr('上班 {in}', { in: timeLabel(s.punchIn) });
     }
-    return text;
+    if (s.overtimeSec >= 60) {
+      return tr('上班 {in} · 下班 {out} · 加班 {t}', {
+        in: timeLabel(s.punchIn),
+        out: timeLabel(s.punchOut),
+        t: formatOvertime(s.overtimeSec)
+      });
+    }
+    if (s.punchOut < s.endM) {
+      return tr('上班 {in} · 下班 {out} · 早退 {t}', {
+        in: timeLabel(s.punchIn),
+        out: timeLabel(s.punchOut),
+        t: formatDuration((s.endM - s.punchOut) * 60)
+      });
+    }
+    return tr('上班 {in} · 下班 {out}', {
+      in: timeLabel(s.punchIn),
+      out: timeLabel(s.punchOut)
+    });
   }
   if (!cfg.showRemaining) return '';
-  if (s.phase === 'before') return '距离上班 ' + formatDuration(s.remainingSec);
-  if (s.phase === 'lunch') return '午休中 · ' + timeLabel(s.lunchEndM) + ' 结束';
-  if (s.phase === 'overtime') {
-    return s.overtimeSec < 60 ? '准时下班' : '加班 ' + formatOvertime(s.overtimeSec);
+  if (s.phase === 'before') return tr('距离上班 {t}', { t: formatDuration(s.remainingSec) });
+  if (s.phase === 'lunch') {
+    return tr('午休中 · {t} 结束', { t: timeLabel(s.lunchEndM) });
   }
-  return '距离下班 ' + formatDuration(s.remainingSec);
+  if (s.phase === 'overtime') {
+    return s.overtimeSec < 60
+      ? tr('准时下班')
+      : tr('加班 {t}', { t: formatOvertime(s.overtimeSec) });
+  }
+  return tr('距离下班 {t}', { t: formatDuration(s.remainingSec) });
 }
 
 function footRight(s) {
@@ -314,11 +349,11 @@ function footRight(s) {
   const money = (v) => (cfg.privacy ? '¥•••' : formatMoney(v));
   if (s.phase === 'overtime' || (s.phase === 'done' && s.overtimeSec >= 60)) {
     if (s.overtimeMode === 'pay') {
-      return '加班费 +' + money(s.overtimePay);
+      return tr('加班费 +{m}', { m: money(s.overtimePay) });
     }
-    return '准点下班 ' + money(s.hourly);
+    return tr('准点下班 {m}', { m: money(s.hourly) });
   }
-  return '时薪 ' + money(s.hourly);
+  return tr('时薪 {m}', { m: money(s.hourly) });
 }
 
 function punchKind(s) {
@@ -339,7 +374,7 @@ function updatePunch(s) {
   if (kind) {
     if (btnPunch.dataset.kind !== kind) {
       btnPunch.dataset.kind = kind;
-      btnPunch.textContent = kind === 'in' ? '打卡上班' : '打卡下班';
+      btnPunch.textContent = kind === 'in' ? tr('打卡上班') : tr('打卡下班');
     }
     if (btnPunch.hidden) btnPunch.hidden = false;
     if (app.dataset.punch !== kind) app.dataset.punch = kind;
@@ -377,30 +412,30 @@ function render(s) {
 
   setText('pill', pillText(s));
 
-  let label = '今日已赚';
-  if (isRest) label = layout === 'receipt' ? '' : '工资条今天放假';
+  let label = tr('今日已赚');
+  if (isRest) label = layout === 'receipt' ? '' : tr('工资条今天放假');
   else if (isOvertime) {
     const full = s.earned >= s.target - 0.005;
     label =
       s.overtimeMode === 'pay'
-        ? '今日已赚 · 含加班'
+        ? tr('今日已赚 · 含加班')
         : full
-          ? '今日工资已到账'
-          : '今日已赚';
+          ? tr('今日工资已到账')
+          : tr('今日已赚');
   } else if (isDone) {
     const full = s.earned >= s.target - 0.005;
     label =
       s.overtimeMode === 'pay' && s.overtimeSec >= 60
-        ? '今日已赚 · 含加班'
+        ? tr('今日已赚 · 含加班')
         : full
-          ? '今日工资已到账'
-          : '今日已赚';
+          ? tr('今日工资已到账')
+          : tr('今日已赚');
   }
   setText('label', label);
 
   setText(
     'amount',
-    isRest ? (layout === 'receipt' ? '—' : '今天休息') : money(s.earned)
+    isRest ? (layout === 'receipt' ? '—' : tr('今天休息')) : money(s.earned)
   );
 
   const targetVisible =
@@ -413,7 +448,7 @@ function render(s) {
   if (target) {
     target.textContent =
       layout === 'jar'
-        ? '目标 ' + money(s.target)
+        ? tr('目标 {m}', { m: money(s.target) })
         : layout === 'receipt'
           ? money(s.target)
           : '/ ' + money(s.target);
@@ -439,7 +474,7 @@ function render(s) {
 
   const stamp = el('stamp');
   if (stamp) {
-    stamp.textContent = isRest ? '休息' : percent + '%';
+    stamp.textContent = isRest ? tr('休息') : percent + '%';
     stamp.style.display = isRest || !cfg.showPercent ? 'none' : 'flex';
   }
 
@@ -452,7 +487,7 @@ function render(s) {
     strip.classList.toggle('bad', otVisible && s.retention < 0.8);
   }
   if (otVisible) {
-    setText('effLabel', s.overtimeMode === 'pay' ? '加班时薪' : '实际时薪');
+    setText('effLabel', s.overtimeMode === 'pay' ? tr('加班时薪') : tr('实际时薪'));
     setText('effRate', money(s.effHourly));
     setText(
       'effDelta',
@@ -547,19 +582,18 @@ function checkNotification(s) {
     cfg = next;
   });
   const body = cfg.privacy
-    ? '今日工资已到账，准点下班。'
+    ? tr('今日工资已到账，准点下班。')
     : s.overtimeMode === 'pay'
-      ? '加班费 +' + formatMoney(s.overtimePay) + '，别太晚。'
+      ? tr('加班费 +{m}，别太晚。', { m: formatMoney(s.overtimePay) })
       : s.overtimeSec > 600
-        ? '已经加班 ' +
-          formatOvertime(s.overtimeSec) +
-          '，实际时薪 ' +
-          formatMoney(s.effHourly) +
-          '。'
+        ? tr('已经加班 {t}，实际时薪 {m}。', {
+            t: formatOvertime(s.overtimeSec),
+            m: formatMoney(s.effHourly)
+          })
         : s.earned >= s.target - 0.005
-          ? '今日 ' + formatMoney(s.target) + ' 已赚满，准点下班。'
-          : '已下班，今日已赚 ' + formatMoney(s.earned) + '。';
-  bridge.notify('到点 · 今日工资已到账', body);
+          ? tr('今日 {m} 已赚满，准点下班。', { m: formatMoney(s.target) })
+          : tr('已下班，今日已赚 {m}。', { m: formatMoney(s.earned) });
+  bridge.notify(tr('到点 · 今日工资已到账'), body);
 }
 
 function tick() {
@@ -598,39 +632,46 @@ function sendSummary() {
   if (!state) return;
   let text;
   if (cfg.privacy) {
-    if (state.phase === 'rest') text = '到点 · 今天休息';
-    else if (state.phase === 'done') text = '到点 · 已下班';
-    else if (state.phase === 'overtime') text = '到点 · 已下班';
-    else if (state.phase === 'before') text = '到点 · 还没上班';
-    else text = '到点 · 工作中';
+    if (state.phase === 'rest') text = tr('到点 · 今天休息');
+    else if (state.phase === 'done') text = tr('到点 · 已下班');
+    else if (state.phase === 'overtime') text = tr('到点 · 已下班');
+    else if (state.phase === 'before') text = tr('到点 · 还没上班');
+    else text = tr('到点 · 工作中');
     bridge.summary(text);
     return;
   }
-  if (state.phase === 'rest') text = '到点 · 今天休息';
+  if (state.phase === 'rest') text = tr('到点 · 今天休息');
   else if (state.phase === 'done') {
     text =
       state.overtimeMode === 'pay' && state.overtimeSec >= 60
-        ? '到点 · 已下班 · 加班费 +' + formatMoney(state.overtimePay)
-        : '到点 · 已下班 · 今日 ' + formatMoney(state.earned);
+        ? tr('到点 · 已下班 · 加班费 +{m}', { m: formatMoney(state.overtimePay) })
+        : tr('到点 · 已下班 · 今日 {m}', { m: formatMoney(state.earned) });
   } else if (state.phase === 'overtime') {
     text =
       state.overtimeMode === 'pay'
-        ? '到点 · 已下班 · 加班费 +' + formatMoney(state.overtimePay)
-        : '到点 · 已下班 · 实际时薪 ' + formatMoney(state.effHourly);
-  } else if (state.phase === 'before') text = '到点 · 还没上班';
-  else text = '到点 · 今日已赚 ' + formatMoney(state.earned);
+        ? tr('到点 · 已下班 · 加班费 +{m}', { m: formatMoney(state.overtimePay) })
+        : tr('到点 · 已下班 · 实际时薪 {m}', { m: formatMoney(state.effHourly) });
+  } else if (state.phase === 'before') text = tr('到点 · 还没上班');
+  else text = tr('到点 · 今日已赚 {m}', { m: formatMoney(state.earned) });
   bridge.summary(text);
 }
 
 async function handleConfig(next) {
   if (!next) return;
   const prev = cfg;
+  const languageChanged = !!prev && prev.language !== next.language;
   cfg = next;
+  document.documentElement.lang = cfg.language === 'en' ? 'en' : 'zh-CN';
+  document.title = tr('到点');
   if (!prev || prev.fontSize !== next.fontSize) applyFontSize();
   updateEye();
   updateTuckButton();
   applyCustomization(themeId);
-  if (state) render(state);
+  if (languageChanged) {
+    build();
+  } else if (state) {
+    render(state);
+  }
 }
 
 function handleTheme(eff) {
@@ -643,6 +684,8 @@ function handleTheme(eff) {
 
 async function init() {
   cfg = await bridge.getConfig();
+  document.documentElement.lang = cfg.language === 'en' ? 'en' : 'zh-CN';
+  document.title = tr('到点');
   const eff = await bridge.getTheme();
   themeId = (eff && eff.id) || 'cream';
   themeSource = (eff && eff.source) || 'time';

@@ -13,6 +13,7 @@ const FONTS = ['system', 'serif', 'mono'];
 
 const DEFAULTS = {
   version: 1,
+  language: 'zh',
   onboarded: false,
   salary: 8000,
   payDays: 21.75,
@@ -106,6 +107,7 @@ function normalize(raw) {
   const merged = { ...DEFAULTS, ...(raw || {}) };
   const out = {
     ...merged,
+    language: merged.language === 'en' ? 'en' : 'zh',
     salary: clamp(Number(merged.salary) || 0, 0, 100000000),
     payDays: clamp(Number(merged.payDays) || 21.75, 0.01, 31),
     lunchMinutes: clamp(Math.round(Number(merged.lunchMinutes) || 0), 0, 480),

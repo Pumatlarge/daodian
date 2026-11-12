@@ -16,7 +16,13 @@
           <span class="chip" id="effectiveChip">当前：奶油手账</span>
         </p>
       </div>
-      <button class="btn ghost" id="btnClose" type="button">关闭</button>
+      <div class="head-actions">
+        <div class="lang-switch" id="langSwitch">
+          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="en">English</button>
+        </div>
+        <button class="btn ghost" id="btnClose" type="button">关闭</button>
+      </div>
     </header>
 
     <main>
@@ -38,7 +44,7 @@
             </div>
           </label>
           <label class="field">
-            <span>工作日</span>
+            <span>工作日模式</span>
             <select id="workPattern">
               <option value="five_two">固定双休（周一至周五）</option>
               <option value="big_small">大小周</option>
@@ -310,6 +316,7 @@
 
     <script src="../shared/calc.js"></script>
     <script src="../shared/themes.js"></script>
+    <script src="../shared/i18n.js"></script>
     <script src="settings.js"></script>
   </body>
 </html>

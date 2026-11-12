@@ -11,6 +11,7 @@
   - **Custom:** choose whether late arrival and early leave affect pay, set a 0–30 minute grace period, and decide whether time after the shift counts as overtime.
 - **A separate Work statistics window.** Open “工作统计…” from the widget or tray menu. It has day / month / year views: a month calendar with earnings heat and mood emojis, a year wall of 12 mini calendars, and a day detail with a completion ring, punch times, overtime and a workday ribbon. Today updates live.
 - **Mood and notes per day.** In the day view, pick one of six moods (😄 🙂 😐 😫 😴 🔥) and write a short note. It is saved in `stats.json` and the emoji appears in the month calendar.
+- **English / Chinese interface.** The whole UI is translated: setup, widget, settings, statistics, tray menus, dialogs and notifications. Choose English or 中文 in the first-run setup or from the switch in the Settings header. Chinese remains the default; the legacy config defaults to it.
 - Settings → About & updates now has a **GitHub project home** row with an “Open GitHub” button.
 
 ### Changed

@@ -13,7 +13,11 @@ const {
 } = window.DaodianCalc;
 
 const bridge = window.api;
+const { t: translate, apply: applyLanguage } = window.DaodianI18n;
 const $ = (id) => document.getElementById(id);
+
+const MONTH_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEK_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const MOODS = [
   { id: 'happy', emoji: '😄', label: '开心' },
@@ -31,7 +35,12 @@ let days = {};
 let view = 'month';
 let anchor = startOfDay(new Date());
 let selected = startOfDay(new Date());
+let lang = 'zh';
 let toastTimer = null;
+
+function tr(zh, vars) {
+  return translate(lang, zh, vars);
+}
 
 function startOfDay(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -56,11 +65,50 @@ function shortMoney(value) {
 function monthDay(key) {
   const date = parseISODate(key);
   if (!date) return key;
-  return date.getMonth() + 1 + '月' + date.getDate() + '日';
+  return lang === 'en'
+    ? MONTH_EN[date.getMonth()] + ' ' + date.getDate()
+    : date.getMonth() + 1 + '月' + date.getDate() + '日';
 }
 
 function weekdayName(date) {
+  if (lang === 'en') return WEEK_EN[date.getDay()];
   return '周' + ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
+}
+
+function monthTitle(date) {
+  return lang === 'en'
+    ? MONTH_EN[date.getMonth()] + ' ' + date.getFullYear()
+    : date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+}
+
+function dayTitle(date) {
+  if (lang === 'en') {
+    return (
+      WEEK_EN[date.getDay()] +
+      ', ' +
+      MONTH_EN[date.getMonth()] +
+      ' ' +
+      date.getDate() +
+      ', ' +
+      date.getFullYear()
+    );
+  }
+  return (
+    date.getFullYear() +
+    '年' +
+    (date.getMonth() + 1) +
+    '月' +
+    date.getDate() +
+    '日 · ' +
+    weekdayName(date)
+  );
+}
+
+function dayHeading(date) {
+  if (lang === 'en') {
+    return MONTH_EN[date.getMonth()] + ' ' + date.getDate() + ' · ' + weekdayName(date);
+  }
+  return date.getMonth() + 1 + '月' + date.getDate() + '日 · ' + weekdayName(date);
 }
 
 function liveRecord() {
@@ -151,7 +199,7 @@ function moodSummary(items) {
   const parts = MOODS.filter((mood) => counts[mood.id]).map(
     (mood) => mood.emoji + ' ' + counts[mood.id]
   );
-  return parts.length ? parts.join(' · ') : '还没有记录心情';
+  return parts.length ? parts.join(' · ') : tr('还没有记录心情');
 }
 
 function moodItemsBetween(from, to) {
@@ -170,21 +218,25 @@ function toast(message) {
   toastTimer = setTimeout(() => node.classList.remove('show'), 1500);
 }
 
-function summaryCards(stats, countLabel) {
+function summaryCards(stats, earnedLabel) {
+  const recorded =
+    lang === 'en'
+      ? stats.count + ' recorded ' + (stats.count === 1 ? 'day' : 'days')
+      : tr('{n} 个记录日', { n: stats.count });
   return `
     <section class="summary">
-      <div class="sum-card"><span>${countLabel}已赚</span><b>${formatMoney(
+      <div class="sum-card"><span>${tr(earnedLabel)}</span><b>${formatMoney(
         stats.earned
-      )}</b><em>完成 ${stats.pct}%</em></div>
-      <div class="sum-card"><span>日均</span><b>${
+      )}</b><em>${tr('完成 {p}%', { p: stats.pct })}</em></div>
+      <div class="sum-card"><span>${tr('日均')}</span><b>${
         stats.count ? formatMoney(stats.avg) : '—'
-      }</b><em>${stats.count} 个记录日</em></div>
-      <div class="sum-card"><span>计薪工时</span><b>${statHours(
+      }</b><em>${recorded}</em></div>
+      <div class="sum-card"><span>${tr('计薪工时')}</span><b>${statHours(
         stats.worked
-      )}</b><em>不含加班</em></div>
-      <div class="sum-card"><span>加班</span><b>${statHours(
+      )}</b><em>${tr('不含加班')}</em></div>
+      <div class="sum-card"><span>${tr('加班')}</span><b>${statHours(
         stats.overtime
-      )}</b><em>${stats.count ? '按打卡与班次' : '暂无记录'}</em></div>
+      )}</b><em>${stats.count ? tr('按打卡与班次') : tr('暂无记录')}</em></div>
     </section>`;
 }
 
@@ -207,7 +259,7 @@ function monthCell(date, key) {
     .join(' ');
   const title = [
     key,
-    mood ? mood.label : '',
+    mood ? tr(mood.label) : '',
     rec ? formatMoney(earned) : '',
     rec && rec.note ? rec.note : ''
   ]
@@ -246,31 +298,34 @@ function renderMonth() {
   }
   while (cells.length % 7 !== 0) cells.push('<div class="day-cell is-empty"></div>');
 
-  const week = ['一', '二', '三', '四', '五', '六', '日'];
+  const week =
+    lang === 'en'
+      ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      : ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
   return `
-    ${summaryCards(stats, '本月')}
+    ${summaryCards(stats, '本月已赚')}
     <section class="calendar-card">
-      <div class="week-head">${week.map((w) => `<span>周${w}</span>`).join('')}</div>
+      <div class="week-head">${week.map((w) => `<span>${w}</span>`).join('')}</div>
       <div class="cal-grid">${cells.join('')}</div>
       <div class="cal-legend">
-        <span>颜色越深 = 当天工资越高</span>
+        <span>${tr('颜色越深 = 当天工资越高')}</span>
         <span class="legend-bar"></span>
-        <span>右上角是当天心情，右下角 +m 是加班</span>
+        <span>${tr('右上角是当天心情，右下角 +m 是加班')}</span>
       </div>
     </section>
     <section class="highlights">
-      <div class="hl"><span>最努力的一天</span><b>${
+      <div class="hl"><span>${tr('最努力的一天')}</span><b>${
         best
           ? monthDay(best.date) + ' · ' + formatMoney(best.earned)
-          : '这个月还没有工资记录'
+          : tr('这个月还没有工资记录')
       }</b></div>
-      <div class="hl"><span>加班最多</span><b>${
+      <div class="hl"><span>${tr('加班最多')}</span><b>${
         otBest
           ? monthDay(otBest.date) + ' · ' + formatOvertime(otBest.overtimeSec)
-          : '这个月没有加班'
+          : tr('这个月没有加班')
       }</b></div>
-      <div class="hl"><span>心情分布</span><b>${moodSummary(
+      <div class="hl"><span>${tr('心情分布')}</span><b>${moodSummary(
         moodItemsBetween(from, to)
       )}</b></div>
     </section>`;
@@ -300,7 +355,11 @@ function miniMonth(month, year) {
     ]
       .filter(Boolean)
       .join(' ');
-    const title = [key, rec ? formatMoney(earned) : '', rec && rec.mood ? MOOD_BY_ID[rec.mood].label : '']
+    const title = [
+      key,
+      rec ? formatMoney(earned) : '',
+      rec && rec.mood ? tr(MOOD_BY_ID[rec.mood].label) : ''
+    ]
       .filter(Boolean)
       .join(' · ');
     cells.push(
@@ -311,7 +370,9 @@ function miniMonth(month, year) {
   const current = year === now.getFullYear() && month === now.getMonth();
   return `
     <button class="mini ${current ? 'is-current' : ''}" data-month="${month}">
-      <div class="mini-head"><b>${month + 1} 月</b><span>${
+      <div class="mini-head"><b>${
+        lang === 'en' ? MONTH_EN[month] : month + 1 + ' 月'
+      }</b><span>${
         total > 0 ? formatMoney(total) : '—'
       }</span></div>
       <div class="mini-grid">${cells.join('')}</div>
@@ -340,20 +401,24 @@ function renderYear() {
   const otBest = monthly.slice().sort((a, b) => b.overtime - a.overtime)[0];
 
   return `
-    ${summaryCards(stats, '本年')}
+    ${summaryCards(stats, '本年已赚')}
     <section class="year-grid">${monthly.map((item) => miniMonth(item.month, year)).join('')}</section>
     <section class="highlights">
-      <div class="hl"><span>最努力的月份</span><b>${
+      <div class="hl"><span>${tr('最努力的月份')}</span><b>${
         best && best.earned > 0
-          ? best.month + 1 + ' 月 · ' + formatMoney(best.earned)
-          : '今年还没有工资记录'
+          ? (lang === 'en' ? MONTH_EN[best.month] : best.month + 1 + ' 月') +
+            ' · ' +
+            formatMoney(best.earned)
+          : tr('今年还没有工资记录')
       }</b></div>
-      <div class="hl"><span>加班最多</span><b>${
+      <div class="hl"><span>${tr('加班最多')}</span><b>${
         otBest && otBest.overtime > 0
-          ? otBest.month + 1 + ' 月 · ' + formatOvertime(otBest.overtime)
-          : '今年还没有加班记录'
+          ? (lang === 'en' ? MONTH_EN[otBest.month] : otBest.month + 1 + ' 月') +
+            ' · ' +
+            formatOvertime(otBest.overtime)
+          : tr('今年还没有加班记录')
       }</b></div>
-      <div class="hl"><span>心情分布</span><b>${moodSummary(
+      <div class="hl"><span>${tr('心情分布')}</span><b>${moodSummary(
         moodItemsBetween(from, to)
       )}</b></div>
     </section>`;
@@ -425,7 +490,7 @@ function moodPicker(rec) {
         <button type="button" class="mood-btn ${current === mood.id ? 'on' : ''}" data-mood="${
           mood.id
         }">
-          <span>${mood.emoji}</span>${mood.label}
+          <span>${mood.emoji}</span>${tr(mood.label)}
         </button>`
       ).join('')}
     </div>`;
@@ -439,17 +504,17 @@ function renderDay() {
   const earned = Number(rec && rec.earned) || 0;
   const pct = target > 0 ? Math.min(100, (earned / target) * 100) : 0;
   const sc = schedule(cfg);
-  const punchIn = rec && rec.punchIn != null ? timeLabel(rec.punchIn) : '未打卡';
-  const punchOut = rec && rec.punchOut != null ? timeLabel(rec.punchOut) : '未打卡';
+  const punchIn = rec && rec.punchIn != null ? timeLabel(rec.punchIn) : tr('未打卡');
+  const punchOut = rec && rec.punchOut != null ? timeLabel(rec.punchOut) : tr('未打卡');
   const late = rec && rec.punchIn != null && rec.punchIn > sc.startM ? rec.punchIn - sc.startM : 0;
   const early =
     rec && rec.punchOut != null && rec.punchOut < sc.endM ? sc.endM - rec.punchOut : 0;
-  let punchStatus = '未打卡';
+  let punchStatus = tr('未打卡');
   if (rec && rec.punchIn != null) {
-    if (rec.punchOut == null) punchStatus = '未下班';
-    else if (late > 0) punchStatus = '迟到 ' + late + ' 分钟';
-    else if (early > 0) punchStatus = '早退 ' + early + ' 分钟';
-    else punchStatus = '准时';
+    if (rec.punchOut == null) punchStatus = tr('未下班');
+    else if (late > 0) punchStatus = tr('迟到 {n} 分钟', { n: late });
+    else if (early > 0) punchStatus = tr('早退 {n} 分钟', { n: early });
+    else punchStatus = tr('准时');
   }
   const today = key === isoDate(new Date());
 
@@ -457,78 +522,72 @@ function renderDay() {
     <section class="day-hero">
       <div class="ring-wrap">
         <div class="ring" style="--p:${pct.toFixed(1)}">
-          <div class="ring-inner"><b>${Math.round(pct)}%</b><span>完成</span></div>
+          <div class="ring-inner"><b>${Math.round(pct)}%</b><span>${tr('完成')}</span></div>
         </div>
         <span class="ring-label">${formatMoney(earned)} / ${formatMoney(target)}</span>
       </div>
       <div>
         <div class="day-title">
-          <h2>${selected.getMonth() + 1}月${selected.getDate()}日 · ${weekdayName(
-    selected
-  )}</h2>
-          <span class="chip ${rest ? 'rest' : ''}">${rest ? '休息日' : '工作日'}</span>
-          ${today ? '<span class="chip today">今天</span>' : ''}
+          <h2>${dayHeading(selected)}</h2>
+          <span class="chip ${rest ? 'rest' : ''}">${tr(
+    rest ? '休息日' : '工作日'
+  )}</span>
+          ${today ? `<span class="chip today">${tr('今天')}</span>` : ''}
         </div>
         <div class="day-amount">${formatMoney(earned)}<small> / ${formatMoney(target)}</small></div>
-        <div class="day-line">上班 ${punchIn} · 下班 ${punchOut} · 计薪 ${statHours(
-    rec ? rec.workedSec : 0
-  )}</div>
+        <div class="day-line">${tr('上班 {in} · 下班 {out} · 计薪 {t}', {
+          in: punchIn,
+          out: punchOut,
+          t: statHours(rec ? rec.workedSec : 0)
+        })}</div>
         ${ribbon(rec)}
       </div>
     </section>
     <section class="day-cards">
-      <div class="day-card"><span>目标</span><b>${formatMoney(target)}</b></div>
-      <div class="day-card"><span>计薪工时</span><b>${statHours(
+      <div class="day-card"><span>${tr('目标')}</span><b>${formatMoney(target)}</b></div>
+      <div class="day-card"><span>${tr('计薪工时')}</span><b>${statHours(
         rec ? rec.workedSec : 0
       )}</b></div>
-      <div class="day-card"><span>加班</span><b>${
-        rec && rec.overtimeSec >= 60 ? formatOvertime(rec.overtimeSec) : '无'
+      <div class="day-card"><span>${tr('加班')}</span><b>${
+        rec && rec.overtimeSec >= 60 ? formatOvertime(rec.overtimeSec) : tr('无')
       }</b></div>
-      <div class="day-card"><span>打卡状态</span><b>${punchStatus}</b></div>
+      <div class="day-card"><span>${tr('打卡状态')}</span><b>${punchStatus}</b></div>
     </section>
     <section class="mood-card">
       <div class="mood-head">
-        <h3>这一天的心情</h3>
-        <span>心情只保存在本机，会显示在月历里</span>
+        <h3>${tr('这一天的心情')}</h3>
+        <span>${tr('心情只保存在本机，会显示在月历里')}</span>
       </div>
       ${moodPicker(rec)}
-      <textarea id="moodNote" class="mood-note" maxlength="160" placeholder="写一句当天的心情或备注…">${esc(
-        rec ? rec.note : ''
-      )}</textarea>
+      <textarea id="moodNote" class="mood-note" maxlength="160" placeholder="${tr(
+        '写一句当天的心情或备注…'
+      )}">${esc(rec ? rec.note : '')}</textarea>
       <div class="mood-actions">
-        <button class="save-mood" id="saveMood" type="button">保存心情</button>
-        <span>${rec && rec.punchIn == null ? '这一天还没有打卡，也可以先记下心情' : ''}</span>
+        <button class="save-mood" id="saveMood" type="button">${tr('保存心情')}</button>
+        <span>${rec && rec.punchIn == null ? tr('这一天还没有打卡，也可以先记下心情') : ''}</span>
       </div>
     </section>
     ${
       !rec || (!hasWork(rec) && !rec.mood)
-        ? '<p class="empty">这一天还没有工资记录。上班打卡后，收入会自动记录在这里。</p>'
+        ? `<p class="empty">${tr(
+            '这一天还没有工资记录。上班打卡后，收入会自动记录在这里。'
+          )}</p>`
         : ''
     }`;
 }
 
 function periodText() {
-  if (view === 'day') {
-    return (
-      selected.getFullYear() +
-      '年' +
-      (selected.getMonth() + 1) +
-      '月' +
-      selected.getDate() +
-      '日 · ' +
-      weekdayName(selected)
-    );
-  }
-  if (view === 'month') return anchor.getFullYear() + '年' + (anchor.getMonth() + 1) + '月';
-  return anchor.getFullYear() + '年';
+  if (view === 'day') return dayTitle(selected);
+  if (view === 'month') return monthTitle(anchor);
+  return lang === 'en' ? String(anchor.getFullYear()) : anchor.getFullYear() + '年';
 }
 
 function periodSub() {
   if (view === 'day') {
     const rec = dayFor(selected);
     const rest = !isWorkday(cfg, selected);
-    if (rest) return '休息日';
-    return rec && rec.punchIn != null ? '已打卡' : '未打卡';
+    if (rest) return tr('休息日');
+    return rec && rec.punchIn != null ? tr('已打卡') : tr('未打卡');
   }
   const from =
     view === 'month' ? new Date(anchor.getFullYear(), anchor.getMonth(), 1) : new Date(anchor.getFullYear(), 0, 1);
@@ -537,7 +596,17 @@ function periodSub() {
       ? new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)
       : new Date(anchor.getFullYear(), 11, 31);
   const stats = summarize(recordsBetween(from, to));
-  return '记录 ' + stats.count + ' 天 · 完成 ' + stats.pct + '%';
+  if (lang === 'en') {
+    return (
+      stats.count +
+      ' ' +
+      (stats.count === 1 ? 'day' : 'days') +
+      ' · ' +
+      stats.pct +
+      '% complete'
+    );
+  }
+  return tr('记录 {n} 天 · 完成 {p}%', { n: stats.count, p: stats.pct });
 }
 
 function canNext() {
@@ -578,11 +647,11 @@ async function saveMood(mood, options) {
     });
     if (data && data.days) days = data.days;
   } catch (error) {
-    toast('保存失败');
+    toast(tr('保存失败'));
     return;
   }
   if (!opts.silent) {
-    toast(mood ? '心情已记下' : '已保存');
+    toast(mood ? tr('心情已记下') : tr('已保存'));
     render();
   }
 }
@@ -689,6 +758,10 @@ function bind() {
 
   bridge.onConfig((next) => {
     if (!next) return;
+    if (next.language && next.language !== lang) {
+      location.reload();
+      return;
+    }
     cfg = next;
     if (!isTyping()) render();
   });
@@ -696,6 +769,10 @@ function bind() {
 
 async function init() {
   cfg = await bridge.getConfig();
+  lang = cfg.language === 'en' ? 'en' : 'zh';
+  document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+  document.title = tr('到点 · 工作统计');
+  applyLanguage(document.body, lang);
   const data = await bridge.getStats();
   days = (data && data.days) || {};
   const now = startOfDay(new Date());
@@ -709,7 +786,8 @@ async function init() {
 init().catch((error) => {
   console.error(error);
   document.body.innerHTML =
-    '<pre style="padding:24px;color:#b5544a">统计页加载失败：' +
+    '<pre style="padding:24px;color:#b5544a">' +
+    tr('统计页加载失败：') +
     (error && error.message ? error.message : String(error)) +
     '</pre>';
 });
