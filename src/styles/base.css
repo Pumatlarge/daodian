@@ -269,11 +269,17 @@ body {
   background: var(--bad);
 }
 
-.hover-tools {
+.tools-zone {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  z-index: 6;
+  top: 14px;
+  right: 14px;
+  z-index: 8;
+  padding: 4px;
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.hover-tools {
   display: flex;
   gap: 2px;
   opacity: 0;
@@ -282,12 +288,12 @@ body {
   -webkit-app-region: no-drag;
 }
 
-.widget:hover .hover-tools {
+.tools-zone:hover .hover-tools {
   opacity: 1;
   pointer-events: auto;
 }
 
-.widget:hover .pill {
+#app:has(.tools-zone:hover) .pill {
   opacity: 0;
 }
 
@@ -486,7 +492,7 @@ body {
 .punch-btn {
   position: absolute;
   left: 50%;
-  bottom: 6px;
+  bottom: 14px;
   transform: translateX(-50%);
   z-index: 9;
   height: 24px;
@@ -524,6 +530,7 @@ body {
   visibility: hidden;
 }
 
+#app[data-tuck] .tools-zone,
 #app[data-tuck] .punch-btn {
   display: none;
 }

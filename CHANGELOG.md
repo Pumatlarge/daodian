@@ -9,6 +9,7 @@
 - A punch-in after the scheduled end no longer invents overtime from the scheduled end; overtime starts at the actual punch-in.
 - The overtime strip is hidden when there is no base work, so an after-hours punch no longer shows a misleading ¥0.00 effective hourly.
 - The punch button label updates immediately after a language switch.
+- The top-right tools (eye, auto-tuck, gear) and the punch button were moved outside the draggable card body. The whole card is an `-webkit-app-region: drag` area and on Windows it could swallow clicks on its `no-drag` children (seen with the neon skin); the controls are now siblings of the card with a dedicated no-drag hover zone, so hover, click and drag all work reliably.
 
 ## 0.3.0 — 2026-11-12
 
